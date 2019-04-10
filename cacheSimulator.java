@@ -40,7 +40,7 @@ public class cacheSimulator {
 		BufferedReader instStream = new BufferedReader(new FileReader(inFile));
 		String curInst="";
 
-			
+			 
 		//determine numBlocks and TagLength
 		int numBlocksL1= cacheSizeL1/blockSize;
     	int numBlocksL2= cacheSizeL2/blockSize;
@@ -107,8 +107,8 @@ public class cacheSimulator {
 	}
 	public static int[] calcBits(int blockSize,int numBlocks,int assoc)
 	{
-		int blockOffsetBits= (int)(Math.log(blockSize));
-		int indexBits= (int)(Math.log(numBlocks/assoc));
+		int blockOffsetBits= (int)(Math.log(blockSize)/Math.log(2));
+		int indexBits= (int)(Math.log(numBlocks/assoc)/Math.log(2));
 		
 		return new int[]{blockOffsetBits,indexBits,32-blockOffsetBits-indexBits};	
 	}
