@@ -160,6 +160,14 @@ public class Cache {
 
     return result;
   }
+  public String getEvictedInst(int j) {
+    CacheIndex evicted =smallestLRU(j);
+    cacheEntry evictBlock= this.cache[evicted.i][evicted.j];
+    String tag= Integer.toBinaryString(evictBlock.getTag());
+    String index=Integer.toBinaryString(j);
+    String inst=tag+index;
+    return inst;
+  }
 
 /*  // TODO: does this check every i,j ???
   private CacheIndex largestLRU() {
