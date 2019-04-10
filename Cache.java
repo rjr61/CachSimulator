@@ -115,15 +115,17 @@ public class Cache {
       if(nextOpen(index).i() == -1) {
         System.out.println("cache full - do something else");
       } else {
-        System.out.println("open index at: " + nextOpen(index));
+        //System.out.println("open index at: " + nextOpen(index));
+        set(nextOpen(index));
       }
     } else {
-      System.out.println("found at: " + where(index, tag));
+      //System.out.println("found at: " + where(index, tag));
+      set(where(index, tag));
     }
   }
 
   public void set(CacheIndex ci) {
-    
+    getCache()[ci.i()][ci.j()].setAll(1, 666, "new", 0, 1);
   }
 
   // searches across associations for the next open index
