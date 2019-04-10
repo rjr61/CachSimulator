@@ -48,7 +48,7 @@ public class cacheSimulator {
 		//System.out.println("Enter max number of misses");
 
 		System.out.println("Enter the fileName:");
-		File inFile=new File("src/instr.txt");
+		File inFile=new File("instr.txt");
 		//Scanner instStream = new Scanner(inFile);
 		BufferedReader instStream = new BufferedReader(new FileReader(inFile));
 		String curInst="";
