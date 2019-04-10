@@ -3,7 +3,7 @@ public class Cache {
 
   // some global variable declarations
   private cacheEntry[][] cache;
-  private int association, numBlocks;
+  private int association, numBlocks, LRU_count;
 
   // private class used for passing association and numblocks indices efficiently
   private class CacheIndex {
@@ -38,6 +38,7 @@ public class Cache {
     this.cache = null;
     this.association = 0;
     this.numBlocks = 0;
+    this.LRU_count = 0;
   }
 
   // initialize cache object and call initCache()
@@ -45,6 +46,7 @@ public class Cache {
     this.cache = new cacheEntry[association][numBlocks];
     this.association = association;
     this.numBlocks = numBlocks;
+    this.LRU_count = 0;
     initCache();
   }
 
@@ -94,7 +96,7 @@ public class Cache {
   public boolean contains(int index, int tag) {
     if(!isNull()) {
       for (int i = 0; i < getAssociation(); i++) {
-          if(getCache()[i][index].getTag() == tag) {
+          if(getCache()[i][index].getValid() != -1 && getCache()[i][index].getTag() == tag) {
             return true;
         }
       }
@@ -182,7 +184,7 @@ public class Cache {
   }
 
   public void set(CacheIndex ci) {
-    getCache()[ci.i()][ci.j()].setAll(1, 666, "new", 0, 1);
+    getCache()[ci.i()][ci.j()].setAll(1, 666, "new", 0, LRU_count++);
   }
 
   // searches across associations for the next open index
@@ -250,8 +252,8 @@ public class Cache {
           sb.append(getCache()[i][j]);
           sb.append("\n");
         }
-    }
-      sb.append("==============\n");
+        sb.append("==============\n");
+      }
     }
 
     return sb.toString();

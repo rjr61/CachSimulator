@@ -35,7 +35,7 @@ public class Test {
     latency2 = 8;
     blockSize = 4;
     assocL1 = 1;
-    assocL2 = 1;
+    assocL2 = 2;
     //wp = ;
     //ap = ;
 
