@@ -7,11 +7,11 @@ public class cacheEntry {
 	private int LRU;
 	
 	public cacheEntry() {
-		this.valid=0;
-		this.tag=0;
+		this.valid=-1;
+		this.tag=-1;
 		this.data=null;
-		this.dirty=0;
-		this.LRU=0;
+		this.dirty=-1;
+		this.LRU=-1;
 	}
 
 	public cacheEntry(int valid,int tag, String data,int dirty, int LRU) {
@@ -29,6 +29,8 @@ public class cacheEntry {
 	public int getValid() {
 		return this.valid;
 	}
+
+	public int getLRU() {return this.LRU;}
 
 	// setters
 
