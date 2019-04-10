@@ -21,6 +21,7 @@ public class cacheSimulator {
 		int blocksPerSetL1, blocksPerSetL2;
 		int latency1, latency2;
 		int[] bits;
+		String wp,ap;
 
 		// Get user input to initialize L1 and L2 caches
 		Scanner kb = new Scanner(System.in);
@@ -39,11 +40,11 @@ public class cacheSimulator {
 		assocL1 = kb.nextInt();
 		System.out.println("Enter L2 set associativity  with 1 being D-Map");
 		assocL2 = kb.nextInt();
-
-		// TODO
-		/*System.out.println("Enter write policy");
+		System.out.println("Enter write policy");
+		wp = kb.nextLine();
 		System.out.println("Enter allocation policy");
-		System.out.println("Enter max number of misses");*/
+		ap=kb.nextLine();
+		//System.out.println("Enter max number of misses");
 
 /*		System.out.println("Enter the fileName:");
 		File inFile=new File(kb.nextLine());
@@ -75,8 +76,8 @@ public class cacheSimulator {
 
 
 
-		int instAddrL1[];
-		int instAddrL2[];
+		int instL1[];
+		int instL2[];
 		/*reading in instruction
 		while ((curInst= instStream.readLine()) != null) {
 			String[] instArr=curInst.split(" ");
@@ -84,7 +85,8 @@ public class cacheSimulator {
 			instrAddrL2=decode(instArr[1],taglengthL2,indexBitsL2,blockOffsetBitsL2);
 			//read op or write op
 			if(instArr[0].equals("read"))
-			else 
+			else
+			write(instL1,instL2,String wp, ap ,L1);
 		}
 		*/
 
@@ -104,7 +106,49 @@ public class cacheSimulator {
 		
 		return new int[]{blockOffsetBits,indexBits,32-blockOffsetBits-indexBits};	
 	}
-	//TODO:: write to cache read from cache
+
+	//write to cache
+	//wp is write policy ap is allocation policy
+	public static boolean write(int [] instL1, int[] instL2, String wp, String ap, Cache cache)
+	{
+		/*if(cache==null){
+			//this is a mem access latency+=memmLatency return true;
+
+		}*/
+
+		//Latency += cache.Latency
+		if(cache.contains(index,tag))
+		{
+			//cacheHit++;
+			if(wp.equals("wt"))
+			{
+				cache.update(index,tag);
+				write(instL1,instL2,wp, ap, cache.next());
+			}
+			else if(wp.equals("wb"))
+			{
+				cache.update(index, tag);
+			}
+			return true;
+		}
+		else
+		{
+			//cacheMiss++;
+			if(ap.equals("wa"))
+			{
+				cache.update(index,tag);
+				if(wp.equals("wt"))
+				{
+					write(instL1,instL2,wp, ap, cache.next());
+				}
+			}
+			else
+				//write to mem latency+=memLatency
+
+			return false;
+		}
+	}
+	//TODO:: read from cache
 
 
 }
