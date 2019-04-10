@@ -94,19 +94,21 @@ public class cacheSimulator {
 	//returns an int area that has the tag,index,and blockOffset
 	public static int[] decode(String inst, int tagLength,int indexBits,int blockOffsetBits)
 	{
+		int index;
 		int tag=Integer.parseInt(inst.substring(0,tagLength));
-		int index=Integer.parseInt(inst.substring(tagLength,tagLength+indexBits));
+		if(indexBits!=0)index=Integer.parseInt(inst.substring(tagLength,tagLength+indexBits));
+		else index=0;
 		int blockOffset=Integer.parseInt(inst.substring(tagLength+indexBits,tagLength+indexBits+blockOffsetBits));
 		return new int[]{tag,index,blockOffset};
 	}
 	public static int[] calcBits(int blockSize,int numBlocks,int assoc)
 	{
-		int blockOffsetBits= (int)(Math.log(blockSize));
-		int indexBits= (int)(Math.log(numBlocks/assoc));
+		int blockOffsetBits= (int)(Math.log(blockSize)/Math.log(2));
+		int indexBits= (int)(Math.log(numBlocks/assoc)/Math.log(2));
 		
 		return new int[]{blockOffsetBits,indexBits,32-blockOffsetBits-indexBits};	
 	}
-
+/*
 	//write to cache
 	//wp is write policy ap is allocation policy
 	public static boolean write(int [] instL1, int[] instL2, String wp, String ap, Cache cache)
@@ -114,7 +116,7 @@ public class cacheSimulator {
 		/*if(cache==null){
 			//this is a mem access latency+=memmLatency return true;
 
-		}*/
+		}
 
 		//Latency += cache.Latency
 		if(cache.contains(index,tag))
@@ -147,7 +149,7 @@ public class cacheSimulator {
 
 			return false;
 		}
-	}
+	}*/
 	//TODO:: read from cache
 
 
