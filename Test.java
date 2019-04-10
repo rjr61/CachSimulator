@@ -29,13 +29,13 @@ public class Test {
     BufferedReader instStream = new BufferedReader(new FileReader(inFile));
     String curInst="";
 
-    cacheSizeL1 = 32;
+    cacheSizeL1 = 8;
     cacheSizeL2 = 32;
     latency1 = 8;
     latency2 = 8;
     blockSize = 4;
     assocL1 = 1;
-    assocL2 = 1;
+    assocL2 = 2;
     //wp = ;
     //ap = ;
 
@@ -141,37 +141,37 @@ public class Test {
 
     //Latency += cache.Latency
     if (cache.contains(index, tag)) {
-      System.out.println("break 1");
+      //System.out.println("break 1");
       //cacheHit++;
       if (wp.equals("wt")) {
-        System.out.println("break 1.1");
+        //System.out.println("break 1.1");
         cache.update(index, tag);
         return false; // write(instL2, wp, ap, L2);
       } else if (wp.equals("wb")) {
-        System.out.println("break 1.2");
+        //System.out.println("break 1.2");
         cache.update(index, tag);
         return true;
       } else {
-        System.out.println("break 1.3");
+        //System.out.println("break 1.3");
         throw new IllegalArgumentException("Not a valid write policy.");
       }
     } else {
-      System.out.println("break 2");
+      //System.out.println("break 2");
       //cacheMiss++;
       if (ap.equals("wa")) {
-        System.out.println("break 2.1");
+        //System.out.println("break 2.1");
         cache.update(index, tag);
         if (wp.equals("wt")) {
-          System.out.println("break 2.1.1");
+          //System.out.println("break 2.1.1");
           return false; // write(instL2, wp, ap, L2);
         }
       } else {
-        System.out.println("break 2.2");
+        //System.out.println("break 2.2");
         return true;
         //write to mem latency+=memLatency;
       }
     }
-    System.out.println("break 3");
+    //System.out.println("break 3");
     return true;
   }
 
