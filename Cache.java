@@ -3,7 +3,8 @@ public class Cache {
 
   // some global variable declarations
   private cacheEntry[][] cache;
-  private int association, numBlocks, LRU_count;
+  private int association, numBlocks, LRU_count,taglength,indexBits,blockOffsetBits;
+  private String name;
 
   // private class used for passing association and numblocks indices efficiently
   private class CacheIndex {
@@ -18,7 +19,6 @@ public class Cache {
     public int i() {
       return this.i;
     }
-
     public int j() {
       return this.j;
     }
@@ -42,11 +42,15 @@ public class Cache {
   }
 
   // initialize cache object and call initCache()
-  public Cache(int association, int numBlocks) {
+  public Cache(int association, int numBlocks,String name,int taglength,int indexBits,int blockOffsetBits) {
     this.cache = new cacheEntry[association][numBlocks];
     this.association = association;
     this.numBlocks = numBlocks;
     this.LRU_count = 0;
+    this.name=name;
+    this.taglength=taglength;
+    this.indexBits=indexBits;
+    this.blockOffsetBits=blockOffsetBits;
     initCache();
   }
 
@@ -58,7 +62,9 @@ public class Cache {
       }
     }
   }
-
+  public String getName(){
+    return this.name;
+  }
   //returns association
   public int getAssociation() {
     return this.association;
@@ -68,6 +74,17 @@ public class Cache {
   public int getNumBlocks() {
     return this.numBlocks;
   }
+  public int getTagLength()
+  {
+    return this.taglength;
+  }
+  public int getBlockOffsetBits(){
+    return this.blockOffsetBits;
+  }
+  public int getIndexBits(){
+    return this.indexBits;
+  }
+
 
   // returns cache object
   public cacheEntry[][] getCache() {
@@ -219,6 +236,10 @@ public class Cache {
       }
     }
     return new CacheIndex(-1, -1);
+  }
+  public int getCacheIndex(CacheIndex j)
+  {
+      return j.j();
   }
 
   // finds the association index where a tag is located, or returns -1

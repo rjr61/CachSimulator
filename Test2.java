@@ -80,8 +80,8 @@ public class Test2 {
     c.append("\ntagLengthL2: " + taglengthL2);
     System.out.println("\nCalculations:\n\n" + c.toString() + "\n");
 
-    L1 = new Cache(assocL1, blocksPerSetL1);
-    L2 = new Cache(assocL2, blocksPerSetL2);
+    L1 = new Cache(assocL1, blocksPerSetL1,"L1",taglengthL1,indexBitsL1,blockOffsetBitsL1);
+    L2 = new Cache(assocL2, blocksPerSetL2, "L2", taglengthL2, indexBitsL2, blockOffsetBitsL2);
     System.out.println("L1: ");
     L1.printInfo();
 
@@ -160,10 +160,27 @@ public class Test2 {
       //cacheMiss++;
       if (ap.equals("wa")) {
         //System.out.println("break 2.1");
-        cache.update(index, tag);
         if (wp.equals("wt")) {
+          cache.update(index, tag);
           //System.out.println("break 2.1.1");
           return false; // write(instL2, wp, ap, L2);
+        }
+        else if(wp.equals("wb")){
+            if(cache.getCacheIndex(cache.nextOpen(index))==-1){
+              if(cache.getName().equals("L1")){
+                String inst=cache.getEvictedInst(index);
+                cache.update(index,tag);
+                int[] instL2=decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
+                write(instL2,wp,ap,L2);
+              }
+              else {
+                ///writing back to mem tho
+                cache.update(index, tag);
+              }
+            }
+            cache.update(index,tag);
+            return false;
+
         }
       } else {
         //System.out.println("break 2.2");
