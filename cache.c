@@ -42,8 +42,8 @@ int main(int argc,char **argv)
     int indexBitsL1= (int)(log(numBlocksL1/assoc));
     int indexBitsL2= (int)(log(numBlocksL2/assoc));
     //assume mem 2048 2^11 
-    int taglengthL1= 11-blockOffsetBits-indexBitsL1;
-    int taglengthL2= 11-blockOffsetBits-indexBitsL2;
+    int taglengthL1= 32-blockOffsetBits-indexBitsL1;
+    int taglengthL2= 32-blockOffsetBits-indexBitsL2;
     //createL1
 
     create_cache(numBlocksL1,L1cache,assoc,taglengthL1);

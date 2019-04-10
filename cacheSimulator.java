@@ -74,7 +74,8 @@ public class cacheSimulator {
 				cacheL2[j][i]= new cacheEntry();
 			}
 		}
-
+		
+		
 		int instAddrL1[];
 		int instAddrL2[];
 		/*reading in instruction

@@ -6,6 +6,7 @@ public class cacheEntry {
 	public String data;
 	public int recent;
 	public int dirty;
+	public int LRU;
 	
 	public cacheEntry() {
 		this.valid=0;
@@ -13,14 +14,16 @@ public class cacheEntry {
 		this.data=null;
 		this.recent=0;
 		this.dirty=0;
+		this.LRU=0;
 	}
 
-	public cacheEntry(int valid,int tag, String data,int recent,int dirty) {
+	public cacheEntry(int valid,int tag, String data,int recent,int dirty, int LRU) {
 		this.valid=valid;
 		this.tag=tag;
 		this.data=data;
 		this.recent=recent;
 		this.dirty=dirty;
+		this.LRU=LRU;
 	}
 
 	public String toStringV() {
