@@ -122,10 +122,10 @@ public class Cache {
       if(nextOpen(index).i() == -1) {
         // tag not found and no open indices
         //find smallest LRU value and evict
-        evict();
+        evict(index, tag);
       } else {
         //System.out.println("open index at: " + nextOpen(index));
-        set(nextOpen(index));
+        setNew(nextOpen(index), tag);
       }
     } else {
       //System.out.println("found at: " + where(index, tag));
@@ -133,37 +133,35 @@ public class Cache {
     }
   }
 
-  private void evict() {
-    CacheIndex toEvict = smallestLRU();
+  private void evict(int index, int tag) {
+    CacheIndex toEvict = smallestLRU(index);
 
     if(toEvict.i() != -1) {
-      set(toEvict);
+      setNew(toEvict, tag);
     } else {
       System.out.println("See evict method().");
     }
   }
 
   // TODO: does this check every i,j ???
-  private CacheIndex smallestLRU() {
+  private CacheIndex smallestLRU(int j) {
     int smallestLRU = -1;
     CacheIndex result = new CacheIndex(-1, -1);
 
     for (int i = 0; i < getAssociation(); i++) {
-      for(int j=0; j<getNumBlocks();j++) {
-        if(getCache()[i][j].getLRU() != -1 && smallestLRU == -1) {
-          smallestLRU = getCache()[i][j].getLRU();
-          result.set(i,j);
-        } else if(getCache()[i][j].getLRU() != -1 && getCache()[i][j].getLRU() < smallestLRU) {
-          smallestLRU = getCache()[i][j].getLRU();
-          result.set(i,j);
-        }
+      if(getCache()[i][j].getLRU() != -1 && smallestLRU == -1) {
+        smallestLRU = getCache()[i][j].getLRU();
+        result.set(i,j);
+      } else if(getCache()[i][j].getLRU() != -1 && getCache()[i][j].getLRU() < smallestLRU) {
+        smallestLRU = getCache()[i][j].getLRU();
+        result.set(i,j);
       }
     }
 
     return result;
   }
 
-  // TODO: does this check every i,j ???
+/*  // TODO: does this check every i,j ???
   private CacheIndex largestLRU() {
     int largestLRU = -1;
     CacheIndex result = new CacheIndex(-1, -1);
@@ -182,9 +180,14 @@ public class Cache {
 
     return result;
   }
+  */
+
+  public void setNew(CacheIndex ci, int tag) {
+    getCache()[ci.i()][ci.j()].setAll(1, tag, "new", 0, LRU_count++);
+  }
 
   public void set(CacheIndex ci) {
-    getCache()[ci.i()][ci.j()].setAll(1, 666, "new", 0, LRU_count++);
+    getCache()[ci.i()][ci.j()].setLRU(LRU_count++);
   }
 
   // searches across associations for the next open index
