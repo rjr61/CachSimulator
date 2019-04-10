@@ -40,16 +40,18 @@ public class cacheSimulator {
 		assocL1 = kb.nextInt();
 		System.out.println("Enter L2 set associativity  with 1 being D-Map");
 		assocL2 = kb.nextInt();
+		kb.nextLine();
 		System.out.println("Enter write policy");
 		wp = kb.nextLine();
 		System.out.println("Enter allocation policy");
 		ap=kb.nextLine();
 		//System.out.println("Enter max number of misses");
 
-/*		System.out.println("Enter the fileName:");
-		File inFile=new File(kb.nextLine());
+		System.out.println("Enter the fileName:");
+		File inFile=new File("src/instr.txt");
+		//Scanner instStream = new Scanner(inFile);
 		BufferedReader instStream = new BufferedReader(new FileReader(inFile));
-		String curInst="";*/
+		String curInst="";
 
 
 		// calculations
@@ -71,34 +73,35 @@ public class cacheSimulator {
 		L1 = new Cache(assocL1, blocksPerSetL1);
 		L2 = new Cache(assocL2, blocksPerSetL2);
 		L1.printInfo();
-		//System.out.println(L1.toString());
-
+		System.out.println(indexBitsL1);
 
 
 
 		int instL1[];
 		int instL2[];
-		/*reading in instruction
+		//reading in instruction
 		while ((curInst= instStream.readLine()) != null) {
 			String[] instArr=curInst.split(" ");
-			instrAddrL1=decode(instArr[1],taglengthL1,indexBitsL1,blockOffsetBitsL1);
-			instrAddrL2=decode(instArr[1],taglengthL2,indexBitsL2,blockOffsetBitsL2);
+			System.out.println(Arrays.toString(instArr));
+			instL1=decode(instArr[1],taglengthL1,indexBitsL1,blockOffsetBitsL1);
+			instL2=decode(instArr[1],taglengthL2,indexBitsL2,blockOffsetBitsL2);
+			System.out.println(Arrays.toString(instL1));
 			//read op or write op
-			if(instArr[0].equals("read"))
-			else
-			write(instL1,instL2,String wp, ap ,L1);
+			//if(instArr[0].equals("read"))
+			//else
+			//write(instL1,instL2,String wp, ap ,L1);
 		}
-		*/
+
 
 	}
-	//returns an int area that has the tag,index,and blockOffset
+	//returns an int array that has the tag,index,and blockOffset
 	public static int[] decode(String inst, int tagLength,int indexBits,int blockOffsetBits)
 	{
 		int index;
-		int tag=Integer.parseInt(inst.substring(0,tagLength));
-		if(indexBits!=0)index=Integer.parseInt(inst.substring(tagLength,tagLength+indexBits));
+		int tag=Integer.parseInt(inst.substring(0,tagLength),2);
+		if(indexBits!=0)index=Integer.parseInt(inst.substring(tagLength,tagLength+indexBits),2);
 		else index=0;
-		int blockOffset=Integer.parseInt(inst.substring(tagLength+indexBits,tagLength+indexBits+blockOffsetBits));
+		int blockOffset=Integer.parseInt(inst.substring(tagLength+indexBits,tagLength+indexBits+blockOffsetBits),2);
 		return new int[]{tag,index,blockOffset};
 	}
 	public static int[] calcBits(int blockSize,int numBlocks,int assoc)
