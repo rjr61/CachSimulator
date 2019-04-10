@@ -67,8 +67,13 @@ public class cacheSimulator {
 		indexBitsL2=bits[1];
 		taglengthL2=bits[2];
 
-		L1 = new Cache(assocL1, numBlocksL1);
-		L2 = new Cache(assocL2, numBlocksL2);
+		L1 = new Cache(assocL1, blocksPerSetL1);
+		L2 = new Cache(assocL2, blocksPerSetL2);
+		L1.printInfo();
+		//System.out.println(L1.toString());
+
+
+
 
 		int instAddrL1[];
 		int instAddrL2[];

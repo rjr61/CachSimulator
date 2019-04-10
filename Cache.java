@@ -54,8 +54,9 @@ public class Cache {
           sb.append("\n");
         }
       }
+      sb.append("==============\n");
     }
-    sb.append("==============\n");
+   // sb.append("==============\n");
 
     return sb.toString();
   }
