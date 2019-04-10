@@ -1,12 +1,11 @@
 
-
 public class cacheEntry {
-	public int valid;
-	public int tag;
-	public String data;
-	public int recent;
-	public int dirty;
-	public int LRU;
+	private int valid;
+	private int tag;
+	private String data;
+	private int recent;
+	private int dirty;
+	private int LRU;
 	
 	public cacheEntry() {
 		this.valid=0;
@@ -26,20 +25,33 @@ public class cacheEntry {
 		this.LRU=LRU;
 	}
 
+	public int getTag() {
+		return this.tag;
+	}
+
+	public void setData(String data) {
+		this.data = data;
+	}
+
+	public void setLRU(int lru) {
+		this.LRU = lru;
+	}
+
+	public int getValid() {
+		return this.valid;
+	}
+
 	public String toStringV() {
 		String pstring = "";
-		pstring += "Valid: " + valid + "\n";
-		pstring += "Tag: " + tag + "\n";
-		pstring += "Data: " + data + "\n";
-		pstring += "Recent: " + recent + "\n";
-		pstring += "Dirty: " + dirty + "\n";
+		pstring += "|valid|tag|data|recent|dirty|LRU";
+		pstring += toString();
 
 		return pstring;
 	}
 
 	public String toString() {
 		String pstring = "";
-		pstring += "|" + valid + "|" + tag + "|" + data + "|" + recent + "|" + dirty + "|";
+		pstring += "|" + valid + "|" + tag + "|" + data + "|" + recent + "|" + dirty + "|" + LRU + "|";
 		return pstring;
 	}
 
