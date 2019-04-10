@@ -133,6 +133,17 @@ public class Cache {
     }
   }
 
+  public void updateDirty(int index, int tag) {
+    if(where(index, tag).i() == -1) {
+      System.out.println("See updateDirty().");
+    }
+    else {
+      CacheIndex ci = where(index, tag);
+      getCache()[ci.i()][ci.j()].setLRU(LRU_count++);
+      getCache()[ci.i()][ci.j()].setDirty(1);
+    }
+  }
+
   private void evict(int index, int tag) {
     CacheIndex toEvict = smallestLRU(index);
 
