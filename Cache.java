@@ -23,6 +23,11 @@ public class Cache {
       return this.j;
     }
 
+    public void set(int i, int j) {
+      this.i = i;
+      this.j = j;
+    }
+
     public String toString() {
       return "associativity: " + i() + ", block: " + j();
     }
@@ -113,7 +118,9 @@ public class Cache {
   public void update(int index, int tag) {
     if(where(index, tag).i() == -1) {
       if(nextOpen(index).i() == -1) {
-        System.out.println("cache full - do something else");
+        // tag not found and no open indices
+        //find smallest LRU value and evict
+        evict();
       } else {
         //System.out.println("open index at: " + nextOpen(index));
         set(nextOpen(index));
@@ -124,6 +131,56 @@ public class Cache {
     }
   }
 
+  private void evict() {
+    CacheIndex toEvict = smallestLRU();
+
+    if(toEvict.i() != -1) {
+      set(toEvict);
+    } else {
+      System.out.println("See evict method().");
+    }
+  }
+
+  // TODO: does this check every i,j ???
+  private CacheIndex smallestLRU() {
+    int smallestLRU = -1;
+    CacheIndex result = new CacheIndex(-1, -1);
+
+    for (int i = 0; i < getAssociation(); i++) {
+      for(int j=0; j<getNumBlocks();j++) {
+        if(getCache()[i][j].getLRU() != -1 && smallestLRU == -1) {
+          smallestLRU = getCache()[i][j].getLRU();
+          result.set(i,j);
+        } else if(getCache()[i][j].getLRU() != -1 && getCache()[i][j].getLRU() < smallestLRU) {
+          smallestLRU = getCache()[i][j].getLRU();
+          result.set(i,j);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  // TODO: does this check every i,j ???
+  private CacheIndex largestLRU() {
+    int largestLRU = -1;
+    CacheIndex result = new CacheIndex(-1, -1);
+
+    for (int i = 0; i < getAssociation(); i++) {
+      for(int j=0; j<getNumBlocks();j++) {
+        if(getCache()[i][j].getLRU() != -1 && largestLRU == -1) {
+          largestLRU = getCache()[i][j].getLRU();
+          result.set(i,j);
+        } else if(getCache()[i][j].getLRU() != -1 && getCache()[i][j].getLRU() > largestLRU) {
+          largestLRU = getCache()[i][j].getLRU();
+          result.set(i,j);
+        }
+      }
+    }
+
+    return result;
+  }
+
   public void set(CacheIndex ci) {
     getCache()[ci.i()][ci.j()].setAll(1, 666, "new", 0, 1);
   }
@@ -132,7 +189,7 @@ public class Cache {
   public CacheIndex nextOpen(int index) {
     if (!isNull()) {
       for (int i = 0; i < getAssociation(); i++) {
-        if (getCache()[i][index].getValid() == 0) {
+        if (getCache()[i][index].getValid() == -1) {
           return new CacheIndex(i, index);
         }
       }
