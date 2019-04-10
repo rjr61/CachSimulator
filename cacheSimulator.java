@@ -3,79 +3,73 @@ import java.lang.Math;
 import java.io.*;
 public class cacheSimulator {
 
-	private static cacheEntry[][] cacheL1;
-	private static cacheEntry[][] cacheL2;
+	private static Cache L1;
+	private static Cache L2;
+
 	public static void main(String[] args) throws Exception
 	{
-		
-		Scanner kb= new Scanner(System.in);
-		int cacheSizeL1, cacheSizeL2=0;
-		int indexBitsL1, indexBitsL2=0;
-		int latency1=0;
-		int latency2=0;
-		int memLatency=0;
-		int blockSize=0;
-		int blockOffsetBitsL1,blockOffsetBitsL2=0;
-		int taglengthL1, taglengthL2=0;
-		int assocL1, assocL2=0;
-		int setBits=0;
-		
-		System.out.println("Enter cache size in bytes");
-		cacheSizeL1=kb.nextInt();
-		System.out.println("Enter access latency of Level 1 cache");
-		latency1=kb.nextInt();
-		System.out.println("Enter access latency of Level 2 cache");
-		latency2=kb.nextInt();
+
+		//variable declarations
+		int cacheSizeL1, cacheSizeL2;
+		int indexBitsL1, indexBitsL2;
+		int blockSize;
+		int blockOffsetBitsL1,blockOffsetBitsL2;
+		int taglengthL1, taglengthL2;
+		int assocL1, assocL2;
+		int setBits;
+		int numBlocksL1, numBlocksL2;
+		int blocksPerSetL1, blocksPerSetL2;
+		int latency1, latency2;
+		int[] bits;
+
+		// Get user input to initialize L1 and L2 caches
+		Scanner kb = new Scanner(System.in);
+
+		System.out.println("Enter L1 cache size in bytes");
+		cacheSizeL1 = kb.nextInt();
+		System.out.println("Enter L2 cache size in bytes");
+		cacheSizeL2 = kb.nextInt();
+		System.out.println("Enter access latency of L1 cache");
+		latency1 = kb.nextInt();
+		System.out.println("Enter access latency of L2 cache");
+		latency2 = kb.nextInt();
 		System.out.println("Enter block size in bytes");
-		blockSize=kb.nextInt();
-		System.out.println("Enter L1 set associativity with 0 being D-Map");
-		assocL1=kb.nextInt();
-		System.out.println("Enter L2 set associativity  with 0 being D-Map");
-		assocL2=kb.nextInt();
+		blockSize = kb.nextInt();
+		System.out.println("Enter L1 set associativity with 1 being D-Map");
+		assocL1 = kb.nextInt();
+		System.out.println("Enter L2 set associativity  with 1 being D-Map");
+		assocL2 = kb.nextInt();
+
+		// TODO
 		/*System.out.println("Enter write policy");
 		System.out.println("Enter allocation policy");
 		System.out.println("Enter max number of misses");*/
-		System.out.println("Enter the fileName:");
+
+/*		System.out.println("Enter the fileName:");
 		File inFile=new File(kb.nextLine());
 		BufferedReader instStream = new BufferedReader(new FileReader(inFile));
-		String curInst="";
+		String curInst="";*/
 
-			 
-		//determine numBlocks and TagLength
-		int numBlocksL1= cacheSizeL1/blockSize;
-    	int numBlocksL2= cacheSizeL2/blockSize;
-		memLatency=100+latency2;
-	   	int blocksPerSetL1= numBlocksL1/assocL1;
-		int blocksPerSetL2= numBlocksL2/assocL2;
-		int[] bits=calcBits(blockSize,numBlocksL1,assocL1);
+
+		// calculations
+		numBlocksL1= cacheSizeL1/blockSize;
+		numBlocksL2= cacheSizeL2/blockSize;
+
+		blocksPerSetL1= numBlocksL1/assocL1;
+		blocksPerSetL2= numBlocksL2/assocL2;
+
+		bits = calcBits(blockSize,numBlocksL1,assocL1);
 		blockOffsetBitsL1=bits[0];
 		indexBitsL1=bits[1];
 		taglengthL1=bits[2];
 		bits=calcBits(blockSize,numBlocksL2,assocL2);
 		blockOffsetBitsL2=bits[0];
-	 	indexBitsL2=bits[1];
+		indexBitsL2=bits[1];
 		taglengthL2=bits[2];
 
+		L1 = new Cache(assocL1, numBlocksL1);
+		L2 = new Cache(assocL2, numBlocksL2);
 
-		//init empty caches
-		cacheL1= new cacheEntry[assocL1][numBlocksL1];
-		for(int j=0;j<assocL1;j++)
-		{
-			for(int i=0; i<numBlocksL1;i++) 
-			{
-				cacheL1[j][i]= new cacheEntry();
-			}
-		}
-		cacheL2= new cacheEntry[assocL2][numBlocksL2];
-		for(int j=0;j<assocL2;j++)
-		{
-			for(int i=0; i<numBlocksL2;i++) 
-			{
-				cacheL2[j][i]= new cacheEntry();
-			}
-		}
-		
-		
 		int instAddrL1[];
 		int instAddrL2[];
 		/*reading in instruction
@@ -89,13 +83,6 @@ public class cacheSimulator {
 		}
 		*/
 
-
-
-
-		
-		
-		
-
 	}
 	//returns an int area that has the tag,index,and blockOffset
 	public static int[] decode(String inst, int tagLength,int indexBits,int blockOffsetBits)
@@ -107,8 +94,8 @@ public class cacheSimulator {
 	}
 	public static int[] calcBits(int blockSize,int numBlocks,int assoc)
 	{
-		int blockOffsetBits= (int)(Math.log(blockSize)/Math.log(2));
-		int indexBits= (int)(Math.log(numBlocks/assoc)/Math.log(2));
+		int blockOffsetBits= (int)(Math.log(blockSize));
+		int indexBits= (int)(Math.log(numBlocks/assoc));
 		
 		return new int[]{blockOffsetBits,indexBits,32-blockOffsetBits-indexBits};	
 	}
