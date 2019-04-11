@@ -29,14 +29,14 @@ public class Test2 {
     BufferedReader instStream = new BufferedReader(new FileReader(inFile));
     String curInst="";
 
-    cacheSizeL1 = 8;
+    cacheSizeL1 = 16;
     cacheSizeL2 = 32;
     latency1 = 8;
     latency2 = 8;
     blockSize = 4;
     assocL1 = 1;
     assocL2 = 2;
-    wp = "wt";
+    wp = "wb";
     ap = "wa";
 
     StringBuilder iv = new StringBuilder();
@@ -147,7 +147,7 @@ public class Test2 {
       L2.update(instL2[1],instL2[0]);
       //if write back we can just write to L1 normally m
       if(wp.equals("wb")) write(instL1,wp,ap,L1);
-      else if(wp.equals("wt")) L2.update(instL1[1],instL1[0]);
+      else if(wp.equals("wt")) L1.update(instL1[1],instL1[0]);
       return true;
     }
     else
@@ -183,14 +183,14 @@ public class Test2 {
 
     //Latency += cache.Latency
     if (cache.contains(index, tag)) {
-      //System.out.println("break 1");
+      System.out.println("~Cache hit~");
       //cacheHit++;
       if (wp.equals("wt")) {
-        //System.out.println("break 1.1");
+        System.out.println("~update~");
         cache.update(index, tag);
         return false; // write(instL2, wp, ap, L2);
       } else if (wp.equals("wb")) {
-        //System.out.println("break 1.2");
+        System.out.println("~update dirty~");
         cache.updateDirty(index, tag);
         return true;
       } else {
@@ -198,16 +198,16 @@ public class Test2 {
         throw new IllegalArgumentException("Not a valid write policy.");
       }
     } else {
-      //System.out.println("break 2");
+      System.out.println("~cache miss~");
       //cacheMiss++;
       if (ap.equals("wa")) {
-        //System.out.println("break 2.1");
         if (wp.equals("wt")) {
           cache.update(index, tag);
-          //System.out.println("break 2.1.1");
+          System.out.println("~wt~");
           return false; // write(instL2, wp, ap, L2);
         }
         else if(wp.equals("wb")){
+          System.out.println("~wb~");
             if(cache.getCacheIndex(cache.nextOpen(index))==-1){
               if(cache.getName().equals("L1")){
                 String inst=cache.getEvictedInst(index);

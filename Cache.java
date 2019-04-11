@@ -158,6 +158,7 @@ public class Cache {
       CacheIndex ci = where(index, tag);
       getCache()[ci.i()][ci.j()].setLRU(LRU_count++);
       getCache()[ci.i()][ci.j()].setDirty(1);
+      getCache()[ci.i()][ci.j()].setData("dirty");
     }
   }
 
@@ -192,13 +193,17 @@ public class Cache {
     cacheEntry evictBlock= this.cache[evicted.i][evicted.j];
     String tag= intToBinary(evictBlock.getTag());
     String index=intToBinary(j);
-    if(tag.length()!=getTagLength())
+
+    int tag_len = tag.length();
+    int index_len = index.length();
+
+    if(tag_len!=getTagLength())
     {
-      for(int i=0;i<getTagLength()-tag.length();i++)tag= "0"+tag;
+      for(int i=0;i<getTagLength()-tag_len;i++)tag= "0"+tag;
     }
-    if(index.length()!=getIndexBits())
+    if(index_len!=getIndexBits())
     {
-      for(int i=0;i<getIndexBits()-index.length();i++)index= "0"+index;
+      for(int i=0;i<getIndexBits()-index_len;i++)index= "0"+index;
     }
     String inst=""+tag+index;
     return inst;
