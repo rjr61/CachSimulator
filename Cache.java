@@ -171,7 +171,6 @@ public class Cache {
     }
   }
 
-  // TODO: does this check every i,j ???
   private CacheIndex smallestLRU(int j) {
     int smallestLRU = -1;
     CacheIndex result = new CacheIndex(-1, -1);
