@@ -117,6 +117,10 @@ public class Test2 {
       //read op or write op
       //
     }
+
+    System.out.println("L1 hit rate is "+ calcRate(L1.getHits(),L1.getMisses()));
+    System.out.println("L2 hit rate is "+calcRate( L2.getHits(),L2.getMisses()));
+    System.out.println("The total Latency :"+ totalLatency);
   }
 
   // write helper function
@@ -328,5 +332,15 @@ public class Test2 {
     }
     return x;
   }
+  public static double calcRate(int hits, int misses)
+  {
+    double hitNum=(double)hits;
+    double missNum=(double)misses;
+
+    return 100*(hitNum/(hitNum+missNum));
+
+
+  }
+
 
 }
