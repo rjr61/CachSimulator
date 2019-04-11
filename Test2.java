@@ -5,7 +5,7 @@ public class Test2 {
 
   private static Cache L1 = null;
   private static Cache L2 = null;
-
+  private static int totalLatency;
   public static void main(String[] args) throws Exception
   {
 
@@ -47,7 +47,7 @@ public class Test2 {
     iv.append("\nblockSize: " + blockSize);
     iv.append("\nassocL1: " + assocL1);
     iv.append("\nassocL2: " + assocL2);
-    iv.append("\nwp: " + wp);
+    iv.append("\nwt: " + wp);
     iv.append("\nap: " + ap);
     System.out.println("Initializations:\n\n" + iv.toString());
 
@@ -80,8 +80,8 @@ public class Test2 {
     c.append("\ntagLengthL2: " + taglengthL2);
     System.out.println("\nCalculations:\n\n" + c.toString() + "\n");
 
-    L1 = new Cache(assocL1, blocksPerSetL1,"L1",taglengthL1,indexBitsL1,blockOffsetBitsL1);
-    L2 = new Cache(assocL2, blocksPerSetL2, "L2", taglengthL2, indexBitsL2, blockOffsetBitsL2);
+    L1 = new Cache(assocL1, blocksPerSetL1,"L1",taglengthL1,indexBitsL1,blockOffsetBitsL1,latency1);
+    L2 = new Cache(assocL2, blocksPerSetL2, "L2", taglengthL2, indexBitsL2, blockOffsetBitsL2,latency2);
 
     System.out.println("Cache setup: |valid|tag|data|dirty|LRU|\n");
     System.out.println("L1: ");
@@ -98,7 +98,7 @@ public class Test2 {
     while ((curInst= instStream.readLine()) != null) {
       String[] instArr=curInst.split(" ");
       System.out.println(Arrays.toString(instArr));
-      if(instArr.length > 1 && !instArr[0].equals("--")) {
+      if(instArr.length > 1) {
         instL1 = decode(instArr[1], taglengthL1, indexBitsL1, blockOffsetBitsL1);
         instL2 = decode(instArr[1], taglengthL2, indexBitsL2, blockOffsetBitsL2);
         System.out.println("instL1: " + Arrays.toString(instL1));
@@ -107,7 +107,7 @@ public class Test2 {
           read(instL1, instL2, wp, ap, L1, L2);
         }
         else
-        write(instL1, instL2, wp, ap, L1, L2);
+          write(instL1, instL2, wp, ap, L1, L2);
 
         System.out.println("L1:");
         System.out.println(L1.toString());
@@ -131,39 +131,60 @@ public class Test2 {
     }
     else if(wp.equals("wb"))
       write(instL1,wp,ap, L1);
-      return false;
+    return false;
 
   }
   public static boolean read(int[] instL1, int[] instL2, String wp, String ap, Cache L1, Cache L2)
   {
     if(L1.contains(instL1[1],instL1[0])){
       //L1 hit update LRU
+      L1.incHits();
+      totalLatency+=L1.getLatency();
       L1.update(instL1[1],instL1[0]);
       return true;
     }
     else if(L2.contains(instL2[1],instL2[0]))
     {
+      L2.incHits();
+      L1.incMisses();
+
       //L2 hit update LRU
+      //add latency for missed probe to L1 and L2 access
+      totalLatency+=L2.getLatency()+L1.getLatency();
       L2.update(instL2[1],instL2[0]);
-      //if write back we can just write to L1 normally m
+
+      //if write back we can just write to L1 normally let write add l1 latency
       if(wp.equals("wb")) write(instL1,wp,ap,L1);
-      else if(wp.equals("wt")) L1.update(instL1[1],instL1[0]);
+      else if(wp.equals("wt")){
+        //add l1 update latency
+        L1.update(instL1[1],instL1[0]);
+        totalLatency+=L1.getLatency();
+      }
       return true;
     }
     else
-      //MEMORY ACCESS
-      //if write through then write through w/o mem latency
+      //add latency for probbing 1 & 2 then for mem access and inc misses for both caches
+      totalLatency+=L2.getLatency()+L1.getLatency()+L2.getLatency()+100;
+    L2.incMisses();
+    L1.incMisses();
+    //MEMORY ACCESS
+    //if write through then write through w/o mem latency
 
-      //if write back can just do update L2 to place into L2 then write L1 to ensure an evicted block will be sent to L2
-      if(wp.equals("wb")) {
-        L2.update(instL2[1],instL2[0]);
-        write(instL1,wp,ap,L1);
-      }
-      else if(wp.equals("wt"))
-      {
-        L1.update(instL1[1],instL1[0]);
-        L2.update(instL2[1],instL2[0]);
-      }
+    //if write back can just do update L2 to place into L2 then write L1 to ensure an evicted block will be sent to L2
+    if(wp.equals("wb")) {
+      //add for L2 update let the write to L1 trigger += in write
+      totalLatency+=L2.getLatency();
+      L2.update(instL2[1],instL2[0]);
+      write(instL1,wp,ap,L1);
+    }
+    else if(wp.equals("wt"))
+    {
+      //add latency for each level access
+      totalLatency+=L1.getLatency();
+      totalLatency+=L2.getLatency();
+      L1.update(instL1[1],instL1[0]);
+      L2.update(instL2[1],instL2[0]);
+    }
 
 
     return false;
@@ -172,19 +193,22 @@ public class Test2 {
 
   // write function
   public static boolean write(int[] instruction, String wp, String ap, Cache cache) {
+
     int index = instruction[1];
     int tag = instruction[0];
 
     //Latency += cache.Latency
     if (cache.contains(index, tag)) {
-      //System.out.println("~Cache hit~");
+      //System.out.println("break 1");
+      totalLatency+=cache.getLatency();
+      cache.incHits();
       //cacheHit++;
       if (wp.equals("wt")) {
-        //System.out.println("~update~");
+        System.out.println("~update~");
         cache.update(index, tag);
         return false; // write(instL2, wp, ap, L2);
       } else if (wp.equals("wb")) {
-        //System.out.println("~update dirty~");
+        System.out.println("~update dirty~");
         cache.updateDirty(index, tag);
         return true;
       } else if(wp.equals("we")){
@@ -195,31 +219,32 @@ public class Test2 {
         throw new IllegalArgumentException("Not a valid write policy.");
       }
     } else {
-      //System.out.println("~cache miss~");
+      cache.incMisses();
+      totalLatency+=cache.getLatency();
+      //System.out.println("break 2");
       //cacheMiss++;
       if (ap.equals("wa")) {
         if (wp.equals("wt")) {
           cache.update(index, tag);
-          //System.out.println("~wt~");
+          System.out.println("~wt~");
           return false; // write(instL2, wp, ap, L2);
         }
         else if(wp.equals("wb")){
-          //System.out.println("~wb~");
-            if(cache.getCacheIndex(cache.nextOpen(index))==-1){
-              if(cache.getName().equals("L1")){
-                String inst=cache.getEvictedInst(index);
-                cache.update(index,tag);
-                int[] instL2=L2decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
-                write(instL2,wp,ap,L2);
-              }
-              else {
-                //mem latency
-                ///writing back to mem tho
-                cache.update(index, tag);
-              }
+          System.out.println("~wb~");
+          if(cache.getCacheIndex(cache.nextOpen(index))==-1){
+            if(cache.getName().equals("L1")){
+              String inst=cache.getEvictedInst(index);
+              cache.update(index,tag);
+              int[] instL2=L2decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
+              write(instL2,wp,ap,L2);
             }
-            cache.update(index,tag);
-            return false;
+            else {
+              totalLatency+=L2.getLatency()+100+L2.getLatency();
+              cache.update(index, tag);
+            }
+          }
+          cache.update(index,tag);
+          return true;
 
         }
       }
@@ -233,7 +258,7 @@ public class Test2 {
         }
         else
 
-        totalLatency+=L2.getLatency()+100;
+          totalLatency+=L2.getLatency()+100;
         //System.out.println("break 2.2");
         return true;
         //write to mem latency+=memLatency;
@@ -276,16 +301,16 @@ public class Test2 {
     int tag_len = tag.length();
     int index_len = index.length();
 
-      if(tag_len!=tagLength)
+    if(tag_len!=tagLength)
     {
       for(int i=0;i<tagLength-tag_len;i++)tag= "0"+tag;
     }
-      if(index_len!=indexBits)
+    if(index_len!=indexBits)
     {
       for(int i=0;i<indexBits-index_len;i++)index= "0"+index;
     }
     String inst=""+tag+index;
-      return inst;
+    return inst;
   }
   public static String intToBinary(int n)
   {
