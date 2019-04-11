@@ -101,8 +101,11 @@ public class Test2 {
         instL2 = decode(instArr[1], taglengthL2, indexBitsL2, blockOffsetBitsL2);
         System.out.println("instL1: " + Arrays.toString(instL1));
         System.out.println("instL2: " + Arrays.toString(instL2));
-
-        write(instL1, instL2, "wb", "wa", L1, L2);
+        if(instArr[0].equals("read")){
+          read(instL1, instL2, "wt", "wa", L1, L2);
+        }
+        else
+        write(instL1, instL2, "wt", "wa", L1, L2);
 
         System.out.println("L1:");
         System.out.println(L1.toString());
@@ -110,9 +113,7 @@ public class Test2 {
         System.out.println(L2.toString());
       }
       //read op or write op
-      //if(instArr[0].equals("read"))
-      //else
-      //write(instL1,instL2,String wp, ap ,L1);
+      //
     }
   }
 
@@ -129,6 +130,41 @@ public class Test2 {
     else if(wp.equals("wb"))
       write(instL1,wp,ap, L1);
       return false;
+
+  }
+  public static boolean read(int[] instL1, int[] instL2, String wp, String ap, Cache L1, Cache L2)
+  {
+    if(L1.contains(instL1[1],instL1[0])){
+      //L1 hit update LRU
+      L1.update(instL1[1],instL1[0]);
+      return true;
+    }
+    else if(L2.contains(instL2[1],instL2[0]))
+    {
+      //L2 hit update LRU
+      L2.update(instL2[1],instL2[0]);
+      //if write back we can just write to L1 normally m
+      if(wp.equals("wb")) write(instL1,wp,ap,L1);
+      else if(wp.equals("wt")) L2.update(instL1[1],instL1[0]);
+      return true;
+    }
+    else
+      //MEMORY ACCESS
+      //if write through then write through w/o mem latency
+
+      //if write back can just do update L2 to place into L2 then write L1 to ensure an evicted block will be sent to L2
+      if(wp.equals("wb")) {
+        L2.update(instL2[1],instL2[0]);
+        write(instL1,wp,ap,L1);
+      }
+      else if(wp.equals("wt"))
+      {
+        L1.update(instL1[1],instL1[0]);
+        L2.update(instL2[1],instL2[0]);
+      }
+
+
+    return false;
 
   }
 
@@ -178,6 +214,7 @@ public class Test2 {
                 write(instL2,wp,ap,L2);
               }
               else {
+                //mem latency
                 ///writing back to mem tho
                 cache.update(index, tag);
               }
