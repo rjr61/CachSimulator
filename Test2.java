@@ -208,7 +208,6 @@ public class Test2 {
   }
   public static int[] L2decode(String inst, int tagLength,int indexBits,int blockOffsetBits)
   {
-    System.out.println("inst is "+ inst +" inst length is"+ inst.length());
     int index;
     int tag=Integer.parseInt(inst.substring(0,tagLength),2);
     if(indexBits!=0)index=Integer.parseInt(inst.substring(tagLength,tagLength+indexBits),2);
