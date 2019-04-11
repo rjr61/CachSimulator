@@ -223,7 +223,8 @@ public class Test2 {
             return false;
 
         }
-      } else {
+      }
+      else {
         //System.out.println("break 2.2");
         return true;
         //write to mem latency+=memLatency;
