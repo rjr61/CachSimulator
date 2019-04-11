@@ -1,10 +1,9 @@
 
 public class Cache {
-  private final int MEMDATASTART = 1000;
 
   // some global variable declarations
   private cacheEntry[][] cache;
-  private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits, memData;
+  private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits,hits,misses,latency;
   private String name;
 
   // private class used for passing association and numblocks indices efficiently
@@ -40,11 +39,17 @@ public class Cache {
     this.association = 0;
     this.numBlocks = 0;
     this.LRU_count = 0;
-    this.memData = 0;
+    this.name="";
+    this.tagLength=0;
+    this.indexBits=0;
+    this.blockOffsetBits=0;
+    this.hits=0;
+    this.misses=0;
+    this.latency=0;
   }
 
   // initialize cache object and call initCache()
-  public Cache(int association, int numBlocks,String name,int tagLength,int indexBits,int blockOffsetBits) {
+  public Cache(int association, int numBlocks,String name,int tagLength,int indexBits,int blockOffsetBits,int latency) {
     this.cache = new cacheEntry[association][numBlocks];
     this.association = association;
     this.numBlocks = numBlocks;
@@ -53,7 +58,9 @@ public class Cache {
     this.tagLength=tagLength;
     this.indexBits=indexBits;
     this.blockOffsetBits=blockOffsetBits;
-    this.memData = MEMDATASTART;
+    this.hits=0;
+    this.misses=0;
+    this.latency=latency;
     initCache();
   }
 
@@ -65,7 +72,26 @@ public class Cache {
       }
     }
   }
-
+  public int getLatency()
+  {
+    return this.latency;
+  }
+  public int getHits()
+  {
+    return this.hits;
+  }
+  public void incHits()
+  {
+    this.hits++;
+  }
+  public int getMisses()
+  {
+    return this.misses;
+  }
+  public void incMisses()
+  {
+    this.misses++;
+  }
   public String getName(){
     return this.name;
   }
@@ -88,8 +114,6 @@ public class Cache {
   public int getIndexBits(){
     return this.indexBits;
   }
-  public int getMemData() {return this.memData++;}
-  public int getLRUCount() {return this.LRU_count++;}
 
 
   // returns cache object
@@ -119,8 +143,8 @@ public class Cache {
   public boolean contains(int index, int tag) {
     if(!isNull()) {
       for (int i = 0; i < getAssociation(); i++) {
-          if(getCache()[i][index].getValid() != -1 && getCache()[i][index].getTag() == tag) {
-            return true;
+        if(getCache()[i][index].getValid() != -1 && getCache()[i][index].getTag() == tag) {
+          return true;
         }
       }
     }
@@ -162,9 +186,9 @@ public class Cache {
     }
     else {
       CacheIndex ci = where(index, tag);
-      getCache()[ci.i()][ci.j()].setLRU(getLRUCount());
+      getCache()[ci.i()][ci.j()].setLRU(LRU_count++);
       getCache()[ci.i()][ci.j()].setDirty(1);
-      getCache()[ci.i()][ci.j()].setData(getMemData());
+      getCache()[ci.i()][ci.j()].setData("dirty");
     }
   }
   public void evictBlock(int index, int tag)
@@ -231,35 +255,35 @@ public class Cache {
     return x;
   }
 
-/*  // TODO: does this check every i,j ???
-  private CacheIndex largestLRU() {
-    int largestLRU = -1;
-    CacheIndex result = new CacheIndex(-1, -1);
+  /*  // TODO: does this check every i,j ???
+    private CacheIndex largestLRU() {
+      int largestLRU = -1;
+      CacheIndex result = new CacheIndex(-1, -1);
 
-    for (int i = 0; i < getAssociation(); i++) {
-      for(int j=0; j<getNumBlocks();j++) {
-        if(getCache()[i][j].getLRU() != -1 && largestLRU == -1) {
-          largestLRU = getCache()[i][j].getLRU();
-          result.set(i,j);
-        } else if(getCache()[i][j].getLRU() != -1 && getCache()[i][j].getLRU() > largestLRU) {
-          largestLRU = getCache()[i][j].getLRU();
-          result.set(i,j);
+      for (int i = 0; i < getAssociation(); i++) {
+        for(int j=0; j<getNumBlocks();j++) {
+          if(getCache()[i][j].getLRU() != -1 && largestLRU == -1) {
+            largestLRU = getCache()[i][j].getLRU();
+            result.set(i,j);
+          } else if(getCache()[i][j].getLRU() != -1 && getCache()[i][j].getLRU() > largestLRU) {
+            largestLRU = getCache()[i][j].getLRU();
+            result.set(i,j);
+          }
         }
       }
-    }
 
-    return result;
-  }
-  */
+      return result;
+    }
+    */
   public void setNull(CacheIndex ci) {
     getCache()[ci.i()][ci.j()].setAll(-1,-1, null, 0, 0);
   }
   public void setNew(CacheIndex ci, int tag) {
-    getCache()[ci.i()][ci.j()].setAll(1, tag, getMemData(), 0, getLRUCount());
+    getCache()[ci.i()][ci.j()].setAll(1, tag, "new", 0, LRU_count++);
   }
 
   public void set(CacheIndex ci) {
-    getCache()[ci.i()][ci.j()].setLRU(getLRUCount());
+    getCache()[ci.i()][ci.j()].setLRU(LRU_count++);
   }
 
   // searches across associations for the next open index
@@ -275,7 +299,7 @@ public class Cache {
   }
   public int getCacheIndex(CacheIndex j)
   {
-      return j.j();
+    return j.j();
   }
 
   // finds the association index where a tag is located, or returns -1
