@@ -3,7 +3,7 @@ public class Cache {
 
   // some global variable declarations
   private cacheEntry[][] cache;
-  private int association, numBlocks, LRU_count,taglength,indexBits,blockOffsetBits;
+  private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits;
   private String name;
 
   // private class used for passing association and numblocks indices efficiently
@@ -42,13 +42,13 @@ public class Cache {
   }
 
   // initialize cache object and call initCache()
-  public Cache(int association, int numBlocks,String name,int taglength,int indexBits,int blockOffsetBits) {
+  public Cache(int association, int numBlocks,String name,int tagLength,int indexBits,int blockOffsetBits) {
     this.cache = new cacheEntry[association][numBlocks];
     this.association = association;
     this.numBlocks = numBlocks;
     this.LRU_count = 0;
     this.name=name;
-    this.taglength=taglength;
+    this.tagLength=tagLength;
     this.indexBits=indexBits;
     this.blockOffsetBits=blockOffsetBits;
     initCache();
@@ -76,7 +76,7 @@ public class Cache {
   }
   public int getTagLength()
   {
-    return this.taglength;
+    return this.tagLength;
   }
   public int getBlockOffsetBits(){
     return this.blockOffsetBits;
