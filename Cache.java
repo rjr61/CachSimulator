@@ -1,9 +1,11 @@
 
 public class Cache {
 
+  private final int MEMSTART = 1000;
+
   // some global variable declarations
   private cacheEntry[][] cache;
-  private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits,hits,misses,latency;
+  private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits,hits,misses,latency,memData;
   private String name;
 
   // private class used for passing association and numblocks indices efficiently
@@ -46,6 +48,7 @@ public class Cache {
     this.hits=0;
     this.misses=0;
     this.latency=0;
+    this.memData=0;
   }
 
   // initialize cache object and call initCache()
@@ -61,6 +64,7 @@ public class Cache {
     this.hits=0;
     this.misses=0;
     this.latency=latency;
+    this.memData=MEMSTART;
     initCache();
   }
 
@@ -113,6 +117,12 @@ public class Cache {
   }
   public int getIndexBits(){
     return this.indexBits;
+  }
+  public int getLRUCount() {
+    return this.LRU_count++;
+  }
+  public int getMemData() {
+    return this.memData++;
   }
 
 
@@ -186,9 +196,9 @@ public class Cache {
     }
     else {
       CacheIndex ci = where(index, tag);
-      getCache()[ci.i()][ci.j()].setLRU(LRU_count++);
+      getCache()[ci.i()][ci.j()].setLRU(getLRUCount());
       getCache()[ci.i()][ci.j()].setDirty(1);
-      getCache()[ci.i()][ci.j()].setData("dirty");
+      getCache()[ci.i()][ci.j()].setData(getMemData());
     }
   }
   public void evictBlock(int index, int tag)
@@ -276,14 +286,14 @@ public class Cache {
     }
     */
   public void setNull(CacheIndex ci) {
-    getCache()[ci.i()][ci.j()].setAll(-1,-1, null, 0, 0);
+    getCache()[ci.i()][ci.j()] = new cacheEntry();
   }
   public void setNew(CacheIndex ci, int tag) {
-    getCache()[ci.i()][ci.j()].setAll(1, tag, "new", 0, LRU_count++);
+    getCache()[ci.i()][ci.j()].setAll(1, tag, getMemData(), 0, getLRUCount());
   }
 
   public void set(CacheIndex ci) {
-    getCache()[ci.i()][ci.j()].setLRU(LRU_count++);
+    getCache()[ci.i()][ci.j()].setLRU(getLRUCount());
   }
 
   // searches across associations for the next open index
