@@ -246,6 +246,14 @@ public class Test2 {
         }
       }
       else {
+        if(cache.getName().equals("L1"))
+        {
+          String inst=instDecode(instruction,L2.getTagLength(),L2.getIndexBits());
+          int[] instL2=L2decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
+          write(instL2,wp,ap,L2);
+        }
+        else
+
         totalLatency+=L2.getLatency()+100;
         //System.out.println("break 2.2");
         return true;
@@ -281,6 +289,36 @@ public class Test2 {
     int indexBits= (int)(Math.log(numBlocks/assoc)/Math.log(2));
 
     return new int[]{blockOffsetBits,indexBits,32-blockOffsetBits-indexBits};
+  }
+  public static String instDecode(int[] instL1, int tagLength,int indexBits){
+    String tag= intToBinary(instL1[1]);
+    String index=intToBinary(instL1[0]);
+
+    int tag_len = tag.length();
+    int index_len = index.length();
+
+      if(tag_len!=tagLength)
+    {
+      for(int i=0;i<tagLength-tag_len;i++)tag= "0"+tag;
+    }
+      if(index_len!=indexBits)
+    {
+      for(int i=0;i<indexBits-index_len;i++)index= "0"+index;
+    }
+    String inst=""+tag+index;
+      return inst;
+  }
+  public static String intToBinary(int n)
+  {
+    String x="";
+    while(n > 0)
+    {
+      int a = n % 2;
+      x = a + x;
+      n = n / 2;
+
+    }
+    return x;
   }
 
 }
