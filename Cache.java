@@ -1,9 +1,10 @@
 
 public class Cache {
+  private final int MEMDATASTART = 1000;
 
   // some global variable declarations
   private cacheEntry[][] cache;
-  private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits,hits,misses,latency;
+  private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits, memData;
   private String name;
 
   // private class used for passing association and numblocks indices efficiently
@@ -39,17 +40,11 @@ public class Cache {
     this.association = 0;
     this.numBlocks = 0;
     this.LRU_count = 0;
-    this.name="";
-    this.tagLength=0;
-    this.indexBits=0;
-    this.blockOffsetBits=0;
-    this.hits=0;
-    this.misses=0;
-    this.latency=0;
+    this.memData = 0;
   }
 
   // initialize cache object and call initCache()
-  public Cache(int association, int numBlocks,String name,int tagLength,int indexBits,int blockOffsetBits,int latency) {
+  public Cache(int association, int numBlocks,String name,int tagLength,int indexBits,int blockOffsetBits) {
     this.cache = new cacheEntry[association][numBlocks];
     this.association = association;
     this.numBlocks = numBlocks;
@@ -58,9 +53,7 @@ public class Cache {
     this.tagLength=tagLength;
     this.indexBits=indexBits;
     this.blockOffsetBits=blockOffsetBits;
-    this.hits=0;
-    this.misses=0;
-    this.latency=latency;
+    this.memData = MEMDATASTART;
     initCache();
   }
 
@@ -72,26 +65,7 @@ public class Cache {
       }
     }
   }
-  public int getLatency()
-  {
-    return this.latency;
-  }
-  public int getHits()
-  {
-    return this.hits;
-  }
-  public void incHits()
-  {
-    this.hits++;
-  }
-  public int getMisses()
-  {
-    return this.misses;
-  }
-  public void incMisses()
-  {
-    this.misses++;
-  }
+
   public String getName(){
     return this.name;
   }
@@ -114,6 +88,8 @@ public class Cache {
   public int getIndexBits(){
     return this.indexBits;
   }
+  public int getMemData() {return this.memData++;}
+  public int getLRUCount() {return this.LRU_count++;}
 
 
   // returns cache object
@@ -186,9 +162,9 @@ public class Cache {
     }
     else {
       CacheIndex ci = where(index, tag);
-      getCache()[ci.i()][ci.j()].setLRU(LRU_count++);
+      getCache()[ci.i()][ci.j()].setLRU(getLRUCount());
       getCache()[ci.i()][ci.j()].setDirty(1);
-      getCache()[ci.i()][ci.j()].setData("dirty");
+      getCache()[ci.i()][ci.j()].setData(getMemData());
     }
   }
 
@@ -273,11 +249,11 @@ public class Cache {
   */
 
   public void setNew(CacheIndex ci, int tag) {
-    getCache()[ci.i()][ci.j()].setAll(1, tag, "new", 0, LRU_count++);
+    getCache()[ci.i()][ci.j()].setAll(1, tag, getMemData(), 0, getLRUCount());
   }
 
   public void set(CacheIndex ci) {
-    getCache()[ci.i()][ci.j()].setLRU(LRU_count++);
+    getCache()[ci.i()][ci.j()].setLRU(getLRUCount());
   }
 
   // searches across associations for the next open index

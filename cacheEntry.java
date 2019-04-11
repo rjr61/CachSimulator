@@ -2,19 +2,19 @@
 public class cacheEntry {
 	private int valid;
 	private int tag;
-	private String data;
+	private int data;
 	private int dirty;
 	private int LRU;
 	
 	public cacheEntry() {
 		this.valid=-1;
 		this.tag=-1;
-		this.data=null;
+		this.data=-1;
 		this.dirty=-1;
 		this.LRU=-1;
 	}
 
-	public cacheEntry(int valid,int tag, String data,int dirty, int LRU) {
+	public cacheEntry(int valid,int tag, int data,int dirty, int LRU) {
 		this.valid=valid;
 		this.tag=tag;
 		this.data=data;
@@ -38,7 +38,7 @@ public class cacheEntry {
 
 	public void setTag(int tag) {this.tag = tag;}
 
-	public void setData(String data) {
+	public void setData(int data) {
 		this.data = data;
 	}
 
@@ -49,7 +49,7 @@ public class cacheEntry {
 		this.LRU = lru;
 	}
 
-	public void setAll(int valid, int tag, String data, int dirty, int LRU) {
+	public void setAll(int valid, int tag, int data, int dirty, int LRU) {
 		setValid(valid);
 		setTag(tag);
 		setData(data);
