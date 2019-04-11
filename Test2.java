@@ -117,6 +117,10 @@ public class Test2 {
       //read op or write op
       //
     }
+
+    System.out.println("L1 hit rate is "+ calcRate(L1.getHits(),L1.getMisses()));
+    System.out.println("L2 hit rate is "+calcRate( L2.getHits(),L2.getMisses()));
+    System.out.println("The total Latency :"+ totalLatency);
   }
 
   // write helper function
@@ -215,9 +219,13 @@ public class Test2 {
         cache.evictBlock(index,tag);
         String inst=instDecode(instruction,L2.getTagLength(),L2.getIndexBits());
         int[] instL2=L2decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
+        //evictblock L2 then evict block to mem so
         L2.evictBlock(instL2[1],instL2[0]);
-        throw new IllegalArgumentException("Not a valid write policy.");
+        L2.incHits();
+        totalLatency+=L2.getLatency();
+        totalLatency+=L2.getLatency()+100;
       }
+      else throw new IllegalArgumentException("Not a valid write policy.");
     } else {
       cache.incMisses();
       totalLatency+=cache.getLatency();
@@ -248,21 +256,21 @@ public class Test2 {
 
         }
       }
-      else {
+      else{
+          if(cache.getName().equals("L1"))
+          {
+            String inst=instDecode(instruction,L2.getTagLength(),L2.getIndexBits());
+            int[] instL2=L2decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
+            write(instL2,wp,ap,L2);
+          }
+          else {
 
-        if(cache.getName().equals("L1"))
-        {
-          String inst=instDecode(instruction,L2.getTagLength(),L2.getIndexBits());
-          int[] instL2=L2decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
-          write(instL2,wp,ap,L2);
+            totalLatency += L2.getLatency() + 100;
+            //System.out.println("break 2.2");
+            return true;
+            //write to mem latency+=memLatency;
+          }
         }
-        else
-
-          totalLatency+=L2.getLatency()+100;
-        //System.out.println("break 2.2");
-        return true;
-        //write to mem latency+=memLatency;
-      }
     }
     //System.out.println("break 3");
     return true;
@@ -325,5 +333,15 @@ public class Test2 {
     }
     return x;
   }
+  public static double calcRate(int hits, int misses)
+  {
+    double hitNum=(double)hits;
+    double missNum=(double)misses;
+
+    return 100*(hitNum/(hitNum+missNum));
+
+
+  }
+
 
 }
