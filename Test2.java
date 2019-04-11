@@ -211,8 +211,11 @@ public class Test2 {
         System.out.println("~update dirty~");
         cache.updateDirty(index, tag);
         return true;
-      } else {
-        //System.out.println("break 1.3");
+      } else if(wp.equals("we")){
+        cache.evictBlock(index,tag);
+        String inst=instDecode(instruction,L2.getTagLength(),L2.getIndexBits());
+        int[] instL2=L2decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
+        L2.evictBlock(instL2[1],instL2[0]);
         throw new IllegalArgumentException("Not a valid write policy.");
       }
     } else {
@@ -246,6 +249,7 @@ public class Test2 {
         }
       }
       else {
+
         if(cache.getName().equals("L1"))
         {
           String inst=instDecode(instruction,L2.getTagLength(),L2.getIndexBits());
