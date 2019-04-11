@@ -70,8 +70,8 @@ public class cacheSimulator {
 		indexBitsL2=bits[1];
 		taglengthL2=bits[2];
 
-		L1 = new Cache(assocL1, blocksPerSetL1);
-		L2 = new Cache(assocL2, blocksPerSetL2);
+		//L1 = new Cache(assocL1, blocksPerSetL1);
+		//L2 = new Cache(assocL2, blocksPerSetL2);
 		L1.printInfo();
 		System.out.println(indexBitsL1);
 

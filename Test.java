@@ -80,8 +80,8 @@ public class Test {
     c.append("\ntagLengthL2: " + taglengthL2);
     System.out.println("\nCalculations:\n\n" + c.toString() + "\n");
 
-    L1 = new Cache(assocL1, blocksPerSetL1);
-    L2 = new Cache(assocL2, blocksPerSetL2);
+    //L1 = new Cache(assocL1, blocksPerSetL1);
+    //L2 = new Cache(assocL2, blocksPerSetL2);
     System.out.println("L1: ");
     L1.printInfo();
 

@@ -102,7 +102,7 @@ public class Test2 {
         System.out.println("instL1: " + Arrays.toString(instL1));
         System.out.println("instL2: " + Arrays.toString(instL2));
 
-        write(instL1, instL2, "wt", "wa", L1, L2);
+        write(instL1, instL2, "wb", "wa", L1, L2);
 
         System.out.println("L1:");
         System.out.println(L1.toString());
@@ -119,13 +119,17 @@ public class Test2 {
   // write helper function
   public static boolean write(int[] instL1, int[] instL2, String wp, String ap, Cache L1, Cache L2)
   {
-    if(!write(instL1, wp, ap, L1)) {
-      write(instL2, wp, ap, L2);
+    if(wp.equals("wt")) {
+      if (!write(instL1, wp, ap, L1)) {
+        write(instL2, wp, ap, L2);
+      } else {
+        System.out.println("Cache is null, cache contains = true + wb, ap != wa, , function reached end???");
+      }
     }
-    else {
-      System.out.println("Cache is null, cache contains = true + wb, ap != wa, , function reached end???");
-    }
-    return false;
+    else if(wp.equals("wb"))
+      write(instL1,wp,ap, L1);
+      return false;
+
   }
 
   // write function
@@ -170,7 +174,7 @@ public class Test2 {
               if(cache.getName().equals("L1")){
                 String inst=cache.getEvictedInst(index);
                 cache.update(index,tag);
-                int[] instL2=decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
+                int[] instL2=L2decode(inst,L2.getTagLength(),L2.getIndexBits(),L2.getBlockOffsetBits());
                 write(instL2,wp,ap,L2);
               }
               else {
@@ -202,6 +206,16 @@ public class Test2 {
     int blockOffset=Integer.parseInt(inst.substring(tagLength+indexBits,tagLength+indexBits+blockOffsetBits),2);
     return new int[]{tag,index,blockOffset};
   }
+  public static int[] L2decode(String inst, int tagLength,int indexBits,int blockOffsetBits)
+  {
+    System.out.println("inst is "+ inst +" inst length is"+ inst.length());
+    int index;
+    int tag=Integer.parseInt(inst.substring(0,tagLength),2);
+    if(indexBits!=0)index=Integer.parseInt(inst.substring(tagLength,tagLength+indexBits),2);
+    else index=0;
+    return new int[]{tag,index,0};
+  }
+
   public static int[] calcBits(int blockSize,int numBlocks,int assoc)
   {
     int blockOffsetBits= (int)(Math.log(blockSize)/Math.log(2));
