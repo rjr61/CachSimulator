@@ -3,7 +3,7 @@ public class Cache {
 
   // some global variable declarations
   private cacheEntry[][] cache;
-  private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits;
+  private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits,hits,misses,latency;
   private String name;
 
   // private class used for passing association and numblocks indices efficiently
@@ -39,10 +39,17 @@ public class Cache {
     this.association = 0;
     this.numBlocks = 0;
     this.LRU_count = 0;
+    this.name="";
+    this.tagLength=0;
+    this.indexBits=0;
+    this.blockOffsetBits=0;
+    this.hits=0;
+    this.misses=0;
+    this.latency=0;
   }
 
   // initialize cache object and call initCache()
-  public Cache(int association, int numBlocks,String name,int tagLength,int indexBits,int blockOffsetBits) {
+  public Cache(int association, int numBlocks,String name,int tagLength,int indexBits,int blockOffsetBits,int latency) {
     this.cache = new cacheEntry[association][numBlocks];
     this.association = association;
     this.numBlocks = numBlocks;
@@ -51,6 +58,9 @@ public class Cache {
     this.tagLength=tagLength;
     this.indexBits=indexBits;
     this.blockOffsetBits=blockOffsetBits;
+    this.hits=0;
+    this.misses=0;
+    this.latency=latency;
     initCache();
   }
 
@@ -61,6 +71,22 @@ public class Cache {
         this.cache[i][j]= new cacheEntry();
       }
     }
+  }
+  public int getHits()
+  {
+    return this.hits;
+  }
+  public void incHits()
+  {
+    this.hits++;
+  }
+  public int getMisses()
+  {
+    return this.misses;
+  }
+  public void incMisses()
+  {
+    this.misses++;
   }
   public String getName(){
     return this.name;

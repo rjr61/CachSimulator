@@ -80,8 +80,8 @@ public class Test2 {
     c.append("\ntagLengthL2: " + taglengthL2);
     System.out.println("\nCalculations:\n\n" + c.toString() + "\n");
 
-    L1 = new Cache(assocL1, blocksPerSetL1,"L1",taglengthL1,indexBitsL1,blockOffsetBitsL1);
-    L2 = new Cache(assocL2, blocksPerSetL2, "L2", taglengthL2, indexBitsL2, blockOffsetBitsL2);
+    L1 = new Cache(assocL1, blocksPerSetL1,"L1",taglengthL1,indexBitsL1,blockOffsetBitsL1,latency1);
+    L2 = new Cache(assocL2, blocksPerSetL2, "L2", taglengthL2, indexBitsL2, blockOffsetBitsL2,latency2);
 
     System.out.println("Cache setup: |valid|tag|data|dirty|LRU|\n");
     System.out.println("L1: ");
