@@ -59,7 +59,7 @@ public class cacheEntry {
 
 	public String toStringV() {
 		String pstring = "";
-		pstring += "|valid|tag|data|dirty|LRU";
+		pstring += "|valid|tag|data|dirty|LRU|";
 		pstring += toString();
 
 		return pstring;

@@ -36,8 +36,8 @@ public class Test2 {
     blockSize = 4;
     assocL1 = 1;
     assocL2 = 2;
-    //wp = ;
-    //ap = ;
+    wp = "wt";
+    ap = "wa";
 
     StringBuilder iv = new StringBuilder();
     iv.append("cacheSizeL1: " + cacheSizeL1);
@@ -47,8 +47,8 @@ public class Test2 {
     iv.append("\nblockSize: " + blockSize);
     iv.append("\nassocL1: " + assocL1);
     iv.append("\nassocL2: " + assocL2);
-    //iv.append(wp);
-    //iv.append(ap);
+    iv.append("\nwt: " + wp);
+    iv.append("\nap: " + ap);
     System.out.println("Initializations:\n\n" + iv.toString());
 
     // calculations
@@ -82,6 +82,8 @@ public class Test2 {
 
     L1 = new Cache(assocL1, blocksPerSetL1,"L1",taglengthL1,indexBitsL1,blockOffsetBitsL1);
     L2 = new Cache(assocL2, blocksPerSetL2, "L2", taglengthL2, indexBitsL2, blockOffsetBitsL2);
+
+    System.out.println("Cache setup: |valid|tag|data|dirty|LRU|\n");
     System.out.println("L1: ");
     L1.printInfo();
 
@@ -102,10 +104,10 @@ public class Test2 {
         System.out.println("instL1: " + Arrays.toString(instL1));
         System.out.println("instL2: " + Arrays.toString(instL2));
         if(instArr[0].equals("read")){
-          read(instL1, instL2, "wt", "wa", L1, L2);
+          read(instL1, instL2, wp, ap, L1, L2);
         }
         else
-        write(instL1, instL2, "wt", "wa", L1, L2);
+        write(instL1, instL2, wp, ap, L1, L2);
 
         System.out.println("L1:");
         System.out.println(L1.toString());
