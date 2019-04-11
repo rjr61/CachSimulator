@@ -72,6 +72,10 @@ public class Cache {
       }
     }
   }
+  public int getLatency()
+  {
+    return this.latency;
+  }
   public int getHits()
   {
     return this.hits;

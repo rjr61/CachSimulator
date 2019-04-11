@@ -5,7 +5,7 @@ public class Test2 {
 
   private static Cache L1 = null;
   private static Cache L2 = null;
-
+  private static int totalLatency;
   public static void main(String[] args) throws Exception
   {
 
@@ -138,29 +138,50 @@ public class Test2 {
   {
     if(L1.contains(instL1[1],instL1[0])){
       //L1 hit update LRU
+      L1.incHits();
+      totalLatency+=L1.getLatency();
       L1.update(instL1[1],instL1[0]);
       return true;
     }
     else if(L2.contains(instL2[1],instL2[0]))
     {
+      L2.incHits();
+      L1.incMisses();
+
       //L2 hit update LRU
+      //add latency for missed probe to L1 and L2 access
+      totalLatency+=L2.getLatency()+L1.getLatency();
       L2.update(instL2[1],instL2[0]);
-      //if write back we can just write to L1 normally m
+
+      //if write back we can just write to L1 normally let write add l1 latency
       if(wp.equals("wb")) write(instL1,wp,ap,L1);
-      else if(wp.equals("wt")) L2.update(instL1[1],instL1[0]);
+      else if(wp.equals("wt")){
+        //add l1 update latency
+        L1.update(instL1[1],instL1[0]);
+        totalLatency+=L1.getLatency();
+      }
       return true;
     }
     else
+      //add latency for probbing 1 & 2 then for mem access and inc misses for both caches
+      totalLatency+=L2.getLatency()+L1.getLatency()+L2.getLatency()+100;
+      L2.incMisses();
+      L1.incMisses();
       //MEMORY ACCESS
       //if write through then write through w/o mem latency
 
       //if write back can just do update L2 to place into L2 then write L1 to ensure an evicted block will be sent to L2
       if(wp.equals("wb")) {
+        //add for L2 update let the write to L1 trigger += in write
+        totalLatency+=L2.getLatency();
         L2.update(instL2[1],instL2[0]);
         write(instL1,wp,ap,L1);
       }
       else if(wp.equals("wt"))
       {
+        //add latency for each level access
+        totalLatency+=L1.getLatency();
+        totalLatency+=L2.getLatency();
         L1.update(instL1[1],instL1[0]);
         L2.update(instL2[1],instL2[0]);
       }
@@ -172,11 +193,6 @@ public class Test2 {
 
   // write function
   public static boolean write(int[] instruction, String wp, String ap, Cache cache) {
-    if (cache.isNull()) {
-      //this is a mem access latency+=memLatency return true;
-      System.out.println("TODO: Cache is null");
-      return true;
-    }
 
     int index = instruction[1];
     int tag = instruction[0];
@@ -184,6 +200,8 @@ public class Test2 {
     //Latency += cache.Latency
     if (cache.contains(index, tag)) {
       //System.out.println("break 1");
+      totalLatency+=cache.getLatency();
+      cache.incHits();
       //cacheHit++;
       if (wp.equals("wt")) {
         //System.out.println("break 1.1");
@@ -198,6 +216,8 @@ public class Test2 {
         throw new IllegalArgumentException("Not a valid write policy.");
       }
     } else {
+      cache.incMisses();
+      totalLatency+=cache.getLatency();
       //System.out.println("break 2");
       //cacheMiss++;
       if (ap.equals("wa")) {
@@ -216,17 +236,17 @@ public class Test2 {
                 write(instL2,wp,ap,L2);
               }
               else {
-                //mem latency
-                ///writing back to mem tho
+                totalLatency+=L2.getLatency()+100+L2.getLatency();
                 cache.update(index, tag);
               }
             }
             cache.update(index,tag);
-            return false;
+            return true;
 
         }
       }
       else {
+        totalLatency+=L2.getLatency()+100;
         //System.out.println("break 2.2");
         return true;
         //write to mem latency+=memLatency;
