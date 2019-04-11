@@ -191,9 +191,17 @@ public class Cache {
   public String getEvictedInst(int j) {
     CacheIndex evicted =smallestLRU(j);
     cacheEntry evictBlock= this.cache[evicted.i][evicted.j];
-    String tag= Integer.toBinaryString(evictBlock.getTag());
-    String index=Integer.toBinaryString(j);
-    String inst=tag+index;
+    String tag= intToBinary(evictBlock.getTag());
+    String index=intToBinary(j);
+    if(tag.length()!=getTagLength())
+    {
+      for(int i=0;i<getTagLength()-tag.length();i++)tag= "0"+tag;
+    }
+    if(index.length()!=getIndexBits())
+    {
+      for(int i=0;i<getIndexBits()-index.length();i++)index= "0"+index;
+    }
+    String inst=""+tag+index;
     return inst;
   }
   public String intToBinary(int n)
