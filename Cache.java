@@ -167,7 +167,11 @@ public class Cache {
       getCache()[ci.i()][ci.j()].setData(getMemData());
     }
   }
-
+  public void evictBlock(int index, int tag)
+  {
+    CacheIndex ci= where(index,tag);
+    setNull(ci);
+  }
   private void evict(int index, int tag) {
     CacheIndex toEvict = smallestLRU(index);
 
@@ -247,7 +251,9 @@ public class Cache {
     return result;
   }
   */
-
+  public void setNull(CacheIndex ci) {
+    getCache()[ci.i()][ci.j()].setAll(-1,-1, null, 0, 0);
+  }
   public void setNew(CacheIndex ci, int tag) {
     getCache()[ci.i()][ci.j()].setAll(1, tag, getMemData(), 0, getLRUCount());
   }
