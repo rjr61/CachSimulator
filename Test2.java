@@ -29,14 +29,14 @@ public class Test2 {
     BufferedReader instStream = new BufferedReader(new FileReader(inFile));
     String curInst="";
 
-    cacheSizeL1 = 8;
+    cacheSizeL1 = 16;
     cacheSizeL2 = 32;
     latency1 = 8;
     latency2 = 8;
     blockSize = 4;
     assocL1 = 1;
     assocL2 = 2;
-    wp = "wt";
+    wp = "wb";
     ap = "wa";
 
     StringBuilder iv = new StringBuilder();
@@ -204,11 +204,11 @@ public class Test2 {
       cache.incHits();
       //cacheHit++;
       if (wp.equals("wt")) {
-        //System.out.println("break 1.1");
+        System.out.println("~update~");
         cache.update(index, tag);
         return false; // write(instL2, wp, ap, L2);
       } else if (wp.equals("wb")) {
-        //System.out.println("break 1.2");
+        System.out.println("~update dirty~");
         cache.updateDirty(index, tag);
         return true;
       } else {
@@ -221,13 +221,13 @@ public class Test2 {
       //System.out.println("break 2");
       //cacheMiss++;
       if (ap.equals("wa")) {
-        //System.out.println("break 2.1");
         if (wp.equals("wt")) {
           cache.update(index, tag);
-          //System.out.println("break 2.1.1");
+          System.out.println("~wt~");
           return false; // write(instL2, wp, ap, L2);
         }
         else if(wp.equals("wb")){
+          System.out.println("~wb~");
             if(cache.getCacheIndex(cache.nextOpen(index))==-1){
               if(cache.getName().equals("L1")){
                 String inst=cache.getEvictedInst(index);
