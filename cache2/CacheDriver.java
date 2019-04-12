@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
-
+import java.util.ArrayList;
 import static java.lang.System.exit;
 
 public class CacheDriver {
@@ -17,11 +17,12 @@ public class CacheDriver {
 
   public static void main(String[] args) {
     Queue<String> instructions = new LinkedList<>();
+    Queue<String> instruction2 = new LinkedList<>();
     BufferedReader reader;
     Scanner sc = new Scanner(System.in);
 
     int sizeL1, sizeL2, sizeBlock, setAssoc, latencyL1, latencyL2, memLatency, maxMisses, blocksL1, blocksL2, setsL1, setsL2, offsetBits, indexLengthL1, indexLengthL2, tagLengthL1, tagLengthL2;
-    String writePolicy, allocatePolicy, fname, nextInstruction;
+    String writePolicy, allocatePolicy, fname, nextInstruction, mode;
 
     // hard-coded values
     sizeL1 = 1024;
@@ -33,7 +34,7 @@ public class CacheDriver {
     maxMisses = 6;
     writePolicy = "wb";
     allocatePolicy = "wa";
-
+    mode="aum";
 /*    System.out.println("Enter the size of L1: ");
     sizeL1 = sc.nextInt();
     System.out.println("Enter the size of L2: ");
@@ -51,7 +52,9 @@ public class CacheDriver {
     System.out.println("Enter the hit latency for L1: ");
     latencyL1 = sc.nextInt();
     System.out.println("Enter the hit latency for L2: ");
-    latencyL2 = sc.nextInt();*/
+    latencyL2 = sc.nextInt();
+    System.out.println("Enter the max number of misses");
+    maxMisses = sc.nextInt();*/
 
     System.out.println("Enter the file name: ");
     fname = sc.nextLine();
@@ -68,8 +71,8 @@ public class CacheDriver {
     indexLengthL1 = (int)(Math.log(setsL1)/Math.log(2));
     indexLengthL2 = (int)(Math.log(setsL2)/Math.log(2));
 
-    L1 = new Cache(setAssoc, setsL1, "L1");
-    L2 = new Cache(setAssoc, setsL2, "L2");
+    L1 = new Cache(setAssoc, setsL1, "L1",latencyL1);
+    L2 = new Cache(setAssoc, setsL2, "L2",latencyL2);
 
     memLatency = latencyL2 + 100;
 
@@ -86,6 +89,7 @@ public class CacheDriver {
       String line = reader.readLine();
       while(line != null) {
         instructions.add(line);
+        instruction2.add(line);
         line = reader.readLine();
       }
       reader.close();
@@ -96,17 +100,21 @@ public class CacheDriver {
     }
 
     System.out.println("Instructions: " + instructions);
+    //access mode enabled?
+
 
     int instLength = instructions.peek().split(" ")[1].length();
     //System.out.println(instLength);
 
     String instType, instruction, tagL1, tagL2, indexL1, indexL2;
-    int tagL1_int, tagL2_int, indexL1_int, indexL2_int;
+    int tagL1_int, tagL2_int, indexL1_int, indexL2_int,cycleTime=0;
 
     tagLengthL1 = instLength - indexLengthL1 - offsetBits;
     tagLengthL2 = instLength - indexLengthL2 - offsetBits;
 
-    int count = 0, stop = 2, serveTime = 0, returnTime;
+    if(mode.equals("aum"))cycleTime=latencyCalc(instruction2,tagLengthL1,indexLengthL1,tagLengthL2,indexLengthL2,maxMisses);
+
+    int count = 0, stop = 10, serveTime = 0, returnTime;
     while(instructions.peek() != null && count++ < stop) {
       System.out.println("Serve time: " + ++serveTime);
 
@@ -185,7 +193,7 @@ public class CacheDriver {
     }
 
     System.out.println("STOPPING AT INSTRUCTION " + stop);
-
+    System.out.println("The access under misses latency is " + cycleTime);
   }
 
   // cache1 -> cache2
@@ -212,6 +220,47 @@ public class CacheDriver {
 
     // miss
     return false;
+  }
+  public static int latencyCalc(Queue<String> instructions, int tagLengthL1,int indexLengthL1, int tagLengthL2,int indexLengthL2, int max) {
+    String nextInstruction,tagL1,tagL2,indexL1,indexL2,instType,instruction;
+    int tagL1_int,tagL2_int,indexL1_int,indexL2_int,curTime=0,retTime=0;
+    Queue<Integer> buffer = new LinkedList<>();
+    while (instructions.peek() != null) {
+
+      nextInstruction = instructions.remove();
+
+      instType = nextInstruction.split(" ")[0];
+      instruction = nextInstruction.split(" ")[1];
+
+      tagL1 = instruction.substring(0, tagLengthL1);
+      tagL2 = instruction.substring(0, tagLengthL2);
+
+      indexL1 = instruction.substring(tagLengthL1, tagLengthL1 + indexLengthL1);
+      indexL2 = instruction.substring(tagLengthL2, tagLengthL2 + indexLengthL2);
+
+      tagL1_int = Integer.parseInt(tagL1, 2);
+      tagL2_int = Integer.parseInt(tagL2, 2);
+      indexL1_int = Integer.parseInt(indexL1, 2);
+      indexL2_int = Integer.parseInt(indexL2, 2);
+
+      //add one cycle to fetch inst and initialize return time
+      curTime++;
+      retTime=curTime;
+      while(buffer.peek()!=null && buffer.peek()<=curTime)buffer.remove();
+      //if L1 just add L1 latency to curTime and process next instruction
+      if(L1.contains(indexL1_int,tagL1_int)) curTime+= L1.getLatency();
+      else if(L2.contains(indexL2_int,tagL2_int))curTime+=L2.getLatency()+L1.getLatency();
+      else {
+        retTime=L2.getLatency()+L1.getLatency()+100;
+        if(buffer.size()==max)
+        {
+          curTime=buffer.remove();
+        }
+          buffer.add(retTime+curTime);
+      }
+    }
+    while(buffer.peek()!=null) curTime=buffer.remove();
+    return curTime;
   }
 
 }

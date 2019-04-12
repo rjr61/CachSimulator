@@ -6,7 +6,7 @@ public class Cache {
 
   // some global variable declarations
   private CacheEntry[][] cache;
-  private int association, numBlocks, LRU_count, memData;
+  private int association, numBlocks, LRU_count, memData, latency;
   private String name;
 
   // private class used for passing association and numblocks indices efficiently
@@ -44,16 +44,18 @@ public class Cache {
     this.LRU_count = 0;
     this.name = null;
     this.memData=0;
+    this.latency=0;
   }
 
   // initialize cache object and call initCache()
-  public Cache(int association, int numBlocks, String name) {
+  public Cache(int association, int numBlocks, String name,int latency) {
     this.cache = new CacheEntry[association][numBlocks];
     this.association = association;
     this.numBlocks = numBlocks;
     this.LRU_count = 0;
     this.name=name;
     this.memData=generateMemAdress();
+    this.latency=latency;
     initCache();
   }
 
@@ -73,7 +75,10 @@ public class Cache {
   public int getAssociation() {
     return this.association;
   }
-
+  //return latency
+  public int getLatency() {
+    return this.latency;
+  }
   //returns numBlocks
   public int getNumBlocks() {
     return this.numBlocks;
