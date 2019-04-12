@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
-import java.util.ArrayList;
-import static java.lang.System.exit;
 
 public class CacheDriver {
 
@@ -164,21 +162,77 @@ public class CacheDriver {
             // latency is a combination of all 3 accesses
             returnTime += latencyL1 + latencyL2 + memLatency;
             // hit, write to L1, L2, and memory
-            // copy from write to L1 and from L1 to L2
-            L1.editCache(tagL1_int, indexL1_int);
+            // write to L1 and from L1 to L2
+            L1.editCache(tagL1_int, indexL1_int, 0);
             cacheToCache(L1, L2, tagL1_int, indexL1_int, tagL2_int, indexL2_int);
           } else if(L2.contains(tagL2_int, indexL2_int)) {
             // miss L1, hit L2; check write allocate policy, write to L2 and memory
             // latency is a combination of all 3 accesses ? (assuming check L1, edit L2, edit mem)
             returnTime += latencyL1 + latencyL2 + memLatency;
-            L2.editCache(tagL2_int, indexL2_int);
+            L2.editCache(tagL2_int, indexL2_int, 0);
+          } else {
+            // total cycles = check L1 + check L2 + write to mem
+            returnTime += latencyL1 + latencyL2 + memLatency;
+            // copy from mem to L2 and from L2 to L1
+            L2.memToCache(tagL2_int, indexL2_int);
+            cacheToCache(L2, L1, tagL2_int, indexL2_int, tagL1_int, indexL1_int);
+          }
+        } else if(writePolicy.equals("wb")) {
+          if(L1.contains(tagL1_int, indexL1_int)) {
+            // update data and dirty bit
+             L1.editCache(tagL1_int, indexL1_int, 1);
+          } else if(L2.contains(tagL2_int, indexL2_int)) {
+            // L2 hit, update data and dirty = 1
+            L2.editCache(tagL2_int, indexL2_int, 1);
 
             if(allocatePolicy.equals("wa")) {
-              // copy from L2 to L1
-              // latency is another L2 + L1
+              // write back to L1; CHECK IF DIRTY
+              // find LRU and check if dirty
+              if(L1.LRU_isDirty(indexL1_int)) {
+                if(L2.LRU_isDirty(indexL2_int)) {
+                  // write L2_LRU to memory
+                  // evict L2_LRU
+                  // write L1_LRU to L2
+                } else {
+                  // evict L2_LRU
+                  // write L1_LRU to L2
+                }
+              } else {
+                // evict L1_LRU
+              }
+
               cacheToCache(L2, L1, tagL2_int, indexL2_int, tagL1_int, indexL1_int);
             }
-            // LEFT OFF HERE
+          } else {
+            // miss, write to memory (latency)
+            // memory -> L2, L2 -> L1
+
+            if(allocatePolicy.equals("wa")) {
+              // write back to L2 and L1; CHECK DIRTY
+
+              if(L2.LRU_isDirty(indexL2_int)) {
+                // write L2_LRU to memory
+                // evict L2_LRU
+                // write memory to L2
+              } else {
+                // evict L2_LRU
+                // write memory to L2
+              }
+
+              if(L1.LRU_isDirty(indexL1_int)) {
+                if(L2.LRU_isDirty(indexL2_int)) {
+                  // write L2_LRU to memory
+                  // evict L2_LRU
+                  // write L1_LRU to L2
+                } else {
+                  // evict L2_LRU
+                  // write L1_LRU to L2
+                }
+              } else {
+                // evict L1_LRU
+              }
+
+            }
           }
         }
       }

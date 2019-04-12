@@ -113,6 +113,12 @@ public class Cache {
     }
   }
 
+  public boolean isDirty(int index, int tag) {
+    CacheIndex check = where(index, tag);
+
+    return getCache()[check.i()][check.j()].getDirty() == 1;
+  }
+
   public void memToCache(int tag, int index) {
     // find next available space or evict
     CacheIndex space = open(index);
@@ -124,16 +130,20 @@ public class Cache {
     }
   }
 
-  public void editCache(int tag, int index) {
+  public void editCache(int tag, int index, int dirty) {
     CacheIndex entry = where(index, tag);
 
-    setCache(entry.i(), entry.j(), newCacheEntry(1, tag, generateMemAdress(), 0, getLRUCount()));
+    setCache(entry.i(), entry.j(), newCacheEntry(1, tag, generateMemAdress(), dirty, getLRUCount()));
   }
 
   private void evictLRU(int tag, int index) {
     CacheIndex LRU_index = findLRU(index);
 
     setCache(LRU_index.i(), LRU_index.j(), newCacheEntry(1, tag, generateMemAdress(), 0, getLRUCount()));
+  }
+
+  public boolean LRU_isDirty(int index) {
+    return getCache()[findLRU(index).i()][findLRU(index).j()].getDirty() == 1;
   }
 
   private CacheIndex findLRU(int index) {

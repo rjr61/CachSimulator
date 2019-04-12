@@ -35,6 +35,8 @@ public class CacheEntry {
 
   public int getData() {return this.data;}
 
+  public int getDirty() {return this.dirty;}
+
   // setters
 
   public void setValid(int valid) {this.valid = valid;}
