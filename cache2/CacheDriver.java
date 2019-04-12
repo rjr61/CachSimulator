@@ -110,7 +110,6 @@ public class CacheDriver {
     tagLengthL1 = instLength - indexLengthL1 - offsetBits;
     tagLengthL2 = instLength - indexLengthL2 - offsetBits;
 
-
     int count = 0, stop = 10, serveTime = 0, returnTime;
     while(instructions.peek() != null && count++ < stop) {
       System.out.println("Serve time: " + ++serveTime);
@@ -191,14 +190,25 @@ public class CacheDriver {
               if(L1.LRU_isDirty(indexL1_int)) {
                 if(L2.LRU_isDirty(indexL2_int)) {
                   // write L2_LRU to memory
-                  // evict L2_LRU
-                  // write L1_LRU to L2
+                  L2.writeToMem(indexL2_int);
+                    // get L1_LRU (tag, data)
+                  int[] L1_LRU = L1.getLRU(indexL1_int);
+                    // TODO: L2 instruction decode
+                    L2.writeToCache(increaseTag(L1_LRU[0], tagLengthL2), increaseIndex(indexL1_int, indexLengthL2), L1_LRU[1]);
+                  // write L2 -> L1
+                  cacheToCache(L2, L1, tagL2_int, indexL2_int, tagL1_int, indexL1_int);
                 } else {
                   // evict L2_LRU
                   // write L1_LRU to L2
+                    // get L1_LRU (tag, index, data)
+                    //L2.writeToCache();
+                  // write L2 -> L1
+                  cacheToCache(L2, L1, tagL2_int, indexL2_int, tagL1_int, indexL1_int);
                 }
               } else {
                 // evict L1_LRU
+                // write L2 -> L1
+                cacheToCache(L2, L1, tagL2_int, indexL2_int, tagL1_int, indexL1_int);
               }
 
               cacheToCache(L2, L1, tagL2_int, indexL2_int, tagL1_int, indexL1_int);
@@ -212,11 +222,14 @@ public class CacheDriver {
 
               if(L2.LRU_isDirty(indexL2_int)) {
                 // write L2_LRU to memory
-                // evict L2_LRU
+                L2.writeToMem(indexL2_int);
                 // write memory to L2
+                // evict L2_LRU
+                L2.memToCache(tagL2_int, indexL2_int);
               } else {
                 // evict L2_LRU
                 // write memory to L2
+                L2.memToCache(tagL2_int, indexL2_int);
               }
 
               if(L1.LRU_isDirty(indexL1_int)) {
@@ -253,6 +266,22 @@ public class CacheDriver {
   private static void cacheToCache(Cache cache1, Cache cache2, int tag1, int index1, int tag2, int index2) {
     int data = cache1.getCacheData(tag1, index1);
     cache2.writeToCache(tag2, index2, data);
+  }
+
+  public static int increaseTag(int tag, int len) {
+    String stringTag= Integer.toBinaryString(tag);
+    if(stringTag.length()!=len)
+    {
+      for(int i=0;i<len-stringTag.length();i++)stringTag= "0"+stringTag;
+    }
+
+    return Integer.parseInt(stringTag);
+
+  }
+
+  public static int increaseIndex(int index, int len) {
+    String stringIndex=Integer.toBinaryString(index);
+    return -1;
   }
 
   public static boolean readL1(int tag, int index) {

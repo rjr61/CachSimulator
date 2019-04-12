@@ -163,6 +163,12 @@ public class Cache {
     return result;
   }
 
+  public int[] getLRU(int index) {
+    CacheIndex LRU = findLRU(index);
+
+    return new int[] {getCache()[LRU.i()][LRU.j()].getTag(), getCache()[LRU.i()][LRU.j()].getData()};
+  }
+
   // finds the association index where a tag is located, or returns -1
   public CacheIndex where(int index, int tag) {
     if(!isNull()) {
@@ -179,6 +185,12 @@ public class Cache {
     CacheIndex where = where(index, tag);
 
     return getCache()[where.i()][where.j()].getData();
+  }
+
+  public void writeToMem(int index) {
+    CacheIndex LRU = findLRU(index);
+
+    getCache()[LRU.i()][LRU.j()].setDirty(0);
   }
 
   public void writeToCache(int tag, int index, int data) {
