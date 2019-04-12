@@ -112,7 +112,6 @@ public class CacheDriver {
     tagLengthL1 = instLength - indexLengthL1 - offsetBits;
     tagLengthL2 = instLength - indexLengthL2 - offsetBits;
 
-    if(mode.equals("aum"))cycleTime=latencyCalc(instruction2,tagLengthL1,indexLengthL1,tagLengthL2,indexLengthL2,maxMisses);
 
     int count = 0, stop = 10, serveTime = 0, returnTime;
     while(instructions.peek() != null && count++ < stop) {
@@ -244,7 +243,7 @@ public class CacheDriver {
       indexL2_int = Integer.parseInt(indexL2, 2);
 
       //add one cycle to fetch inst and initialize return time
-      curTime++;
+
       retTime=curTime;
       while(buffer.peek()!=null && buffer.peek()<=curTime)buffer.remove();
       //if L1 just add L1 latency to curTime and process next instruction
@@ -258,7 +257,9 @@ public class CacheDriver {
         }
           buffer.add(retTime+curTime);
       }
+      if(instructions.peek() != null) curTime+=10;
     }
+
     while(buffer.peek()!=null) curTime=buffer.remove();
     return curTime;
   }
