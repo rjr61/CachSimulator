@@ -1,10 +1,11 @@
+package cache2;
 
-public class Cache {
+public class CacheOld {
 
   private final int MEMSTART = 1000;
 
   // some global variable declarations
-  private cacheEntry[][] cache;
+  private CacheEntry[][] cache;
   private int association, numBlocks, LRU_count, tagLength,indexBits,blockOffsetBits,hits,misses,latency,memData;
   private String name;
 
@@ -36,7 +37,7 @@ public class Cache {
   }
 
   //initialize empty
-  public Cache() {
+  public CacheOld() {
     this.cache = null;
     this.association = 0;
     this.numBlocks = 0;
@@ -52,8 +53,8 @@ public class Cache {
   }
 
   // initialize cache object and call initCache()
-  public Cache(int association, int numBlocks,String name,int tagLength,int indexBits,int blockOffsetBits,int latency) {
-    this.cache = new cacheEntry[association][numBlocks];
+  public CacheOld(int association, int numBlocks,String name,int tagLength,int indexBits,int blockOffsetBits,int latency) {
+    this.cache = new CacheEntry[association][numBlocks];
     this.association = association;
     this.numBlocks = numBlocks;
     this.LRU_count = 0;
@@ -72,7 +73,7 @@ public class Cache {
   private void initCache() {
     for(int i=0;i<getAssociation();i++) {
       for(int j=0;j<getNumBlocks();j++) {
-        this.cache[i][j]= new cacheEntry();
+        this.cache[i][j]= new CacheEntry();
       }
     }
   }
@@ -127,7 +128,7 @@ public class Cache {
 
 
   // returns cache object
-  public cacheEntry[][] getCache() {
+  public CacheEntry[][] getCache() {
     return this.cache;
   }
 
@@ -140,8 +141,8 @@ public class Cache {
     }
   }
 
-/*  // returns a cacheEntry object; currently unused
-  public cacheEntry getCacheEntry(int a, int n) {
+/*  // returns a CacheEntry object; currently unused
+  public CacheEntry getCacheEntry(int a, int n) {
     if(!isNull()) {
       return getCache()[a][n];
     }
@@ -153,7 +154,7 @@ public class Cache {
   public boolean contains(int index, int tag) {
     if(!isNull()) {
       for (int i = 0; i < getAssociation(); i++) {
-        if(getCache()[i][index].getValid() != -1 && getCache()[i][index].getTag() == tag) {
+        if(getCache()[i][index].getValid() != 0 && getCache()[i][index].getTag() == tag) {
           return true;
         }
       }
@@ -234,7 +235,7 @@ public class Cache {
   }
   public String getEvictedInst(int j) {
     CacheIndex evicted =smallestLRU(j);
-    cacheEntry evictBlock= this.cache[evicted.i][evicted.j];
+    CacheEntry evictBlock= this.cache[evicted.i][evicted.j];
     String tag= intToBinary(evictBlock.getTag());
     String index=intToBinary(j);
 
@@ -286,7 +287,7 @@ public class Cache {
     }
     */
   public void setNull(CacheIndex ci) {
-    getCache()[ci.i()][ci.j()] = new cacheEntry();
+    getCache()[ci.i()][ci.j()] = new CacheEntry();
   }
   public void setNew(CacheIndex ci, int tag) {
     getCache()[ci.i()][ci.j()].setAll(1, tag, getMemData(), 0, getLRUCount());
@@ -300,7 +301,7 @@ public class Cache {
   public CacheIndex nextOpen(int index) {
     if (!isNull()) {
       for (int i = 0; i < getAssociation(); i++) {
-        if (getCache()[i][index].getValid() == -1) {
+        if (getCache()[i][index].getValid() == 0) {
           return new CacheIndex(i, index);
         }
       }

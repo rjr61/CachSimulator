@@ -1,6 +1,10 @@
+package cache1;
+
 import java.util.*;
 import java.lang.Math;
 import java.io.*;
+
+
 public class cacheSimulator {
 
 	private static Cache L1 = null;
@@ -21,13 +25,7 @@ public class cacheSimulator {
 		int blocksPerSetL1, blocksPerSetL2;
 		int latency1, latency2;
 		int[] bits;
-		String wp,ap;
-
-		//System.out.println("Enter the fileName:");
-		File inFile=new File("src/instr.txt");
-		//Scanner instStream = new Scanner(inFile);
-		BufferedReader instStream = new BufferedReader(new FileReader(inFile));
-		String curInst="";
+		String wp,ap, fname;
 
 
 		// Get user input to initialize L1 and L2 caches
@@ -52,6 +50,13 @@ public class cacheSimulator {
 		wp = kb.nextLine();
 		System.out.println("Enter allocation policy");
 		ap=kb.nextLine();
+    System.out.println("Enter the fileName:");
+    fname=kb.nextLine();
+    File inFile=new File("src/"+fname);
+    //Scanner instStream = new Scanner(inFile);
+    BufferedReader instStream = new BufferedReader(new FileReader(inFile));
+    String curInst;
+
 		//System.out.println("Enter max number of misses");
     /*
     StringBuilder iv = new StringBuilder();
@@ -109,7 +114,7 @@ public class cacheSimulator {
 		int instL1[];
 		int instL2[];
 		//reading in instruction
-		while ((curInst= instStream.readLine()) != null) {
+		while ((curInst = instStream.readLine()) != null) {
 			String[] instArr=curInst.split(" ");
 			System.out.println(Arrays.toString(instArr));
 			if(instArr.length > 1) {
@@ -117,7 +122,7 @@ public class cacheSimulator {
 				instL2 = decode(instArr[1], taglengthL2, indexBitsL2, blockOffsetBitsL2);
 				System.out.println("instL1: " + Arrays.toString(instL1));
 				System.out.println("instL2: " + Arrays.toString(instL2));
-				if(instArr[0].equals("read")){
+				if(instArr[0].equals("R")){
 					read(instL1, instL2, wp, ap, L1, L2);
 				}
 				else
