@@ -19,7 +19,7 @@ public class CacheDriver {
     BufferedReader reader;
     Scanner sc = new Scanner(System.in);
 
-    int sizeL1, sizeL2, sizeBlock, setAssoc, latencyL1, latencyL2, memLatency, maxMisses, blocksL1, blocksL2, setsL1, setsL2, offsetBits, indexLengthL1, indexLengthL2, tagLengthL1, tagLengthL2;
+    int sizeL1, sizeL2, sizeBlock, setAssoc, latencyL1, latencyL2, memLatency, maxMisses, blocksL1, blocksL2, setsL1, setsL2, offsetBits, indexLengthL1, indexLengthL2, tagLengthL1, tagLengthL2,curTime=0;
     String writePolicy, allocatePolicy, fname, nextInstruction, mode;
 
     // hard-coded values
@@ -110,9 +110,13 @@ public class CacheDriver {
     tagLengthL1 = instLength - indexLengthL1 - offsetBits;
     tagLengthL2 = instLength - indexLengthL2 - offsetBits;
 
-
+    Queue<Integer> buffer = new LinkedList<>();
     int count = 0, stop = 10, serveTime = 0, returnTime;
     while(instructions.peek() != null && count++ < stop) {
+
+
+      while(buffer.peek()!=null && buffer.peek()<=curTime)buffer.remove();
+
       System.out.println("Serve time: " + ++serveTime);
 
       nextInstruction = instructions.remove();
@@ -137,14 +141,21 @@ public class CacheDriver {
       if(instType.equals("R")) {
         // readL1, increment cycles by latencyL1
         returnTime += latencyL1;
+        curTime+= latencyL1;
         if(!readL1(tagL1_int, indexL1_int)) { //cache miss
           System.out.println("!!L1 miss!!");
           // readL2, increment cycles by latencyL2
           returnTime += latencyL2;
+          curTime+=latencyL2;
           if(!readL2(tagL2_int, indexL2_int)) {
             System.out.println("!L2 miss!");
-            // increment cycles by memLatency
+            // increment cycles by memLatenc
             returnTime += memLatency;
+            if(buffer.size()==maxMisses)
+            {
+              curTime=buffer.remove();
+            }
+            buffer.add(curTime+memLatency);
             // copy from mem to L2 and from L2 to L1
             L2.memToCache(tagL2_int, indexL2_int);
             cacheToCache(L2, L1, tagL2_int, indexL2_int, tagL1_int, indexL1_int);
@@ -242,11 +253,11 @@ public class CacheDriver {
       serveTime = returnTime;
 
       System.out.println(String.format("Iteration: %d\nCache:\n%s\n%s", count, L1.toString(), L2.toString()));
-
+      if(instructions.peek() != null) curTime+=10;
     }
-
+    while(buffer.peek()!=null) curTime=buffer.remove();
     System.out.println("STOPPING AT INSTRUCTION " + stop);
-    System.out.println("The access under misses latency is " + cycleTime);
+    System.out.println("The access under misses latency is " + curTime);
   }
 
   // cache1 -> cache2
@@ -274,10 +285,10 @@ public class CacheDriver {
     // miss
     return false;
   }
-  public static int latencyCalc(Queue<String> instructions, int tagLengthL1,int indexLengthL1, int tagLengthL2,int indexLengthL2, int max) {
+ /* public static int latencyCalc(Queue<String> instructions, int tagLengthL1,int indexLengthL1, int tagLengthL2,int indexLengthL2, int max) {
     String nextInstruction,tagL1,tagL2,indexL1,indexL2,instType,instruction;
     int tagL1_int,tagL2_int,indexL1_int,indexL2_int,curTime=0,retTime=0;
-    Queue<Integer> buffer = new LinkedList<>();
+
     while (instructions.peek() != null) {
 
       nextInstruction = instructions.remove();
@@ -311,11 +322,11 @@ public class CacheDriver {
         }
           buffer.add(retTime+curTime);
       }
-      if(instructions.peek() != null) curTime+=10;
+
     }
 
     while(buffer.peek()!=null) curTime=buffer.remove();
     return curTime;
-  }
+  }*/
 
 }
