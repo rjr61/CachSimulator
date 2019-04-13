@@ -25,7 +25,7 @@ public class Test2 {
     String wp,ap;
 
     //System.out.println("Enter the fileName:");
-    File inFile=new File("src/instr.txt");
+    File inFile=new File("src/test1.txt");
     //Scanner instStream = new Scanner(inFile);
     BufferedReader instStream = new BufferedReader(new FileReader(inFile));
     String curInst="";

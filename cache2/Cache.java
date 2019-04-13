@@ -100,8 +100,12 @@ public class Cache {
     getCache()[i][j] = d;
   }
 
-  private CacheEntry newCacheEntry(int valid, int tag, int data, int dirty, int LRU) {
+  public CacheEntry newCacheEntry(int valid, int tag, int data, int dirty, int LRU) {
     return new CacheEntry(valid, tag, data, dirty, LRU);
+  }
+  public void evict(CacheIndex toEvict)
+  {
+    setCache(toEvict.i,toEvict.j,new CacheEntry());
   }
 
   // checks if global cache object is null
@@ -124,7 +128,8 @@ public class Cache {
     CacheIndex space = open(index);
 
     if(space.i() != -1 && space.j() != -1) {
-       setCache(space.i(), space.j(), newCacheEntry(1, tag, generateMemAdress(), 0, getLRUCount()));
+      int data=generateMemAdress();
+       setCache(space.i(), space.j(), newCacheEntry(1, tag, data, 0, getLRUCount()));
     } else {
       evictLRU(tag, index);
     }
@@ -135,7 +140,17 @@ public class Cache {
 
     setCache(entry.i(), entry.j(), newCacheEntry(1, tag, generateMemAdress(), dirty, getLRUCount()));
   }
+  public void updateLRU(int tag, int index) {
+    CacheIndex entry = where(index, tag);
+    CacheEntry updateEntry=this.getCache()[entry.i][entry.j];
+    updateEntry.setLRU(this.getLRUCount());
+    setCache(entry.i(), entry.j(), updateEntry);
+  }
+  private void evictData(int tag, int index,int data) {
+    CacheIndex LRU_index = findLRU(index);
 
+    setCache(LRU_index.i(), LRU_index.j(), newCacheEntry(1, tag, data, 0, getLRUCount()));
+  }
   private void evictLRU(int tag, int index) {
     CacheIndex LRU_index = findLRU(index);
 
@@ -143,7 +158,8 @@ public class Cache {
   }
 
   public boolean LRU_isDirty(int index) {
-    return getCache()[findLRU(index).i()][findLRU(index).j()].getDirty() == 1;
+    if(findLRU(index).i()==-1) return false;
+    else return getCache()[findLRU(index).i()][findLRU(index).j()].getDirty() == 1;
   }
 
   private CacheIndex findLRU(int index) {
@@ -180,6 +196,16 @@ public class Cache {
     }
     return new CacheIndex(-1, -1);
   }
+  public CacheEntry getEntry(int index, int tag) {
+    if(!isNull()) {
+      for (int i = 0; i < getAssociation(); i++) {
+        if(getCache()[i][index].getTag() == tag) {
+          return this.getCache()[i][index];
+        }
+      }
+    }
+    return null;
+  }
 
   public int getCacheData(int tag, int index) {
     CacheIndex where = where(index, tag);
@@ -199,6 +225,25 @@ public class Cache {
 
     if(space.i() != -1 && space.j() != -1) {
       setCache(space.i(), space.j(), newCacheEntry(1, tag, data, 0, getLRUCount()));
+    } else {
+      evictData(tag, index,data);
+    }
+  }public void updateData(int tag, int index, int data,int lru) {
+    // find next available space or evict
+    CacheIndex space = open(index);
+
+    if(space.i() != -1 && space.j() != -1) {
+      setCache(space.i(), space.j(), newCacheEntry(1, tag, data, 0,lru));
+    } else {
+      evictLRU(tag, index);
+    }
+  }
+  public void writeToCacheWB(int tag, int index, int data) {
+    // find next available space or evict
+    CacheIndex space = open(index);
+
+    if(space.i() != -1 && space.j() != -1) {
+      setCache(space.i(), space.j(), newCacheEntry(1, tag, data, 1, getLRUCount()));
     } else {
       evictLRU(tag, index);
     }
@@ -231,6 +276,12 @@ public class Cache {
 
     return new CacheIndex(-1, -1);
   }
+  //helper
+  public boolean isFull(int index)
+  {
+    if(open(index).i==-1)return true;
+    else return false;
+  }
 
   // String formatted cache output
   public String toString() {
@@ -252,4 +303,10 @@ public class Cache {
 
     return sb.toString();
   }
+  public int[] getEvictedInst(int j) {
+    CacheIndex evicted =findLRU(j);
+    CacheEntry evictBlock= this.cache[evicted.i][evicted.j];
+    return new int[]{evictBlock.getTag(),j};
+  }
+
 }

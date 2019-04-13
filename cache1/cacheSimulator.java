@@ -86,20 +86,7 @@ public class cacheSimulator {
 		blockOffsetBitsL2=bits[0];
 		indexBitsL2=bits[1];
 		taglengthL2=bits[2];
-    /*
-    StringBuilder c = new StringBuilder();
-    c.append("numBlocksL1: " + numBlocksL1);
-    c.append("\nnumBlocksL2: " + numBlocksL2);
-    c.append("\nblocksPerSetL1: " + blocksPerSetL1);
-    c.append("\nblocksPerSetL2: " + blocksPerSetL2);
-    c.append("\nblockOffsetBitsL1: " + blockOffsetBitsL1);
-    c.append("\nblockOffsetBitsL2: " + blockOffsetBitsL2);
-    c.append("\nindexBitsL1: " + indexBitsL1);
-    c.append("\nindexBitsL2: " + indexBitsL2);
-    c.append("\ntaglengthL1: " + taglengthL1);
-    c.append("\ntagLengthL2: " + taglengthL2);
-    System.out.println("\nCalculations:\n\n" + c.toString() + "\n");
-    */
+
 		L1 = new Cache(assocL1, blocksPerSetL1,"L1",taglengthL1,indexBitsL1,blockOffsetBitsL1,latency1);
 		L2 = new Cache(assocL2, blocksPerSetL2, "L2", taglengthL2, indexBitsL2, blockOffsetBitsL2,latency2);
 
