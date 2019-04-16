@@ -34,6 +34,7 @@ public class CacheDriver {
     writePolicy = "wb";
     allocatePolicy = "wa";
     mode="aum";
+
 /*    System.out.println("Enter the size of L1: ");
     sizeL1 = sc.nextInt();
     System.out.println("Enter the size of L2: ");
@@ -112,7 +113,7 @@ public class CacheDriver {
     tagLengthL2 = instLength - indexLengthL2 - offsetBits;
 
     Queue<Integer> buffer = new LinkedList<>();
-    int count = 0, stop = 10, serveTime = 0, returnTime;
+    int count = 0, stop = instructions.size(), serveTime = 0, returnTime;
     while(instructions.peek() != null && count++ < stop) {
 
 
@@ -135,6 +136,11 @@ public class CacheDriver {
       indexL1_int = Integer.parseInt(indexL1,2);
       indexL2_int = Integer.parseInt(indexL2,2);
 
+      System.out.println("indexL1: " + indexL1_int);
+      System.out.println("tagL1: " + tagL1_int);
+      System.out.println("indexL2: " + indexL2_int);
+      System.out.println("tagL2: " + tagL2_int);
+
 
       returnTime = serveTime;
 
@@ -151,7 +157,7 @@ public class CacheDriver {
             curTime += latencyL2;
             if (!readL2(tagL2_int, indexL2_int)) {
               System.out.println("!L2 miss!");
-              // increment cycles by memLatenc
+              // increment cycles by memLatency
               returnTime += memLatency;
               if (buffer.size() == maxMisses) curTime = buffer.remove();
               buffer.add(curTime + memLatency);
@@ -211,6 +217,7 @@ public class CacheDriver {
       } else if(instType.equals("W")) {
         if(writePolicy.equals("wt")) {
           if(L1.contains(tagL1_int, indexL1_int)) {
+            System.out.println("**L1 hit**");
             // latency is a combination of all 3 accesses
             returnTime += latencyL1 + latencyL2 + memLatency;
             curTime+= latencyL1+latencyL2;
@@ -221,6 +228,7 @@ public class CacheDriver {
             L1.editCache(tagL1_int, indexL1_int, 0);
             cacheToCache(L1, L2, tagL1_int, indexL1_int, tagL2_int, indexL2_int);
           } else if(L2.contains(tagL2_int, indexL2_int)) {
+            System.out.println("*L2 hit*");
             // miss L1, hit L2; check write allocate policy, write to L2 and memory
             // latency is a combination of all 3 accesses ? (assuming check L1, edit L2, edit mem)
             returnTime += latencyL1 + latencyL2 + memLatency;
@@ -229,6 +237,7 @@ public class CacheDriver {
             buffer.add(curTime+memLatency);
             L2.editCache(tagL2_int, indexL2_int, 0);
           } else {
+            System.out.println("!!Write miss!!");
             // total cycles = check L1 + check L2 + write to mem
             returnTime += latencyL1 + latencyL2 + memLatency;
             curTime+= latencyL1+latencyL2;
@@ -240,11 +249,13 @@ public class CacheDriver {
           }
         } else if(writePolicy.equals("wb")) {
           if(L1.contains(indexL1_int, tagL1_int)) {
+            System.out.println("**L1 hit**");
             // update data and dirty bit
             returnTime+=latencyL1;
             curTime+= latencyL1;
              L1.editCache(tagL1_int, indexL1_int, 1);
           } else if(L2.contains(tagL2_int, indexL2_int)) {
+            System.out.println("*L2 hit*");
             // L2 hit, update data and dirty = 1
             L2.editCache(tagL2_int, indexL2_int, 1);
             returnTime+=latencyL2;
@@ -272,6 +283,7 @@ public class CacheDriver {
 
             }
           } else {
+            System.out.println("!!!Write miss!!!");
             returnTime+=latencyL2;
             if(buffer.size()==maxMisses)curTime=buffer.remove();
             buffer.add(curTime+memLatency);
@@ -323,17 +335,20 @@ public class CacheDriver {
             returnTime+=latencyL1+latencyL2;
             curTime+=latencyL1+ latencyL2;
             if(L1.contains(tagL1_int, indexL1_int)) {
+              System.out.println("!!L1 hit!!");
               //access both L1 L2 to boot the entry
               L1.evict(L1.where(tagL1_int,indexL1_int));
               L2.evict(L2.where(tagL2_int,indexL2_int));
             }
             else if(L2.contains(tagL2_int, indexL2_int))
             {
+              System.out.println("!L2 hit!");
               //access L1 to boot the entry
               L2.evict(L2.where(tagL2_int,indexL2_int));
             }
             else
             {
+              System.out.println("Write miss");
                 if(buffer.size()==maxMisses)curTime=buffer.remove();
                 buffer.add(curTime+memLatency);
             }
@@ -358,7 +373,7 @@ public class CacheDriver {
   // cache1 -> cache2
   private static void cacheToCache(Cache cache1, Cache cache2, int tag1, int index1, int tag2, int index2) {
     int data = cache1.getCacheData(tag1, index1);
-    System.out.println("got here and data is "+ data);
+    //System.out.println("got here and data is "+ data);
     cache2.writeToCache(tag2, index2, data);
   }
   private static void cacheToCacheUpdate(Cache cache1, Cache cache2, int tag1, int index1, int tag2, int index2) {
