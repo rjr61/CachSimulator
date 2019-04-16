@@ -140,6 +140,12 @@ public class Cache {
 
     setCache(entry.i(), entry.j(), newCacheEntry(1, tag, generateMemAdress(), dirty, getLRUCount()));
   }
+  //to update data on write thru
+  public void updateCache(int tag, int index, int data) {
+    CacheIndex entry = where(index, tag);
+
+    setCache(entry.i(), entry.j(), newCacheEntry(1, tag, data, 0, getLRUCount()));
+  }
   public void updateLRU(int tag, int index) {
     CacheIndex entry = where(index, tag);
     CacheEntry updateEntry=this.getCache()[entry.i][entry.j];

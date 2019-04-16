@@ -31,8 +31,8 @@ public class CacheDriver {
     latencyL1 = 1;
     latencyL2 = 4;
     maxMisses = 9;
-    writePolicy = "wb";
-    allocatePolicy = "wa";
+    writePolicy = "wt";
+    allocatePolicy = "nwa";
     mode="aum";
 
 /*    System.out.println("Enter the size of L1: ");
@@ -196,7 +196,12 @@ public class CacheDriver {
                 if (L1.LRU_isDirty(indexL1_int)&& L1.isFull(indexL1_int)){
                   //if its dirty update L2 data
                   instL2 = instDecode(L1.getEvictedInst(indexL1_int), tagLengthL1, indexLengthL1, tagLengthL2, indexLengthL2);
-                  cacheToCache(L1, L2, L1.getLRU(indexL1_int)[0], indexL1_int, instL2[0], instL2[1]);
+                  ///this is the line
+                  if (readL2(tagL2_int, indexL2_int))
+                  cacheToCacheUpdate(L1, L2, L1.getLRU(indexL1_int)[0], indexL1_int, instL2[0], instL2[1]);
+                  else
+                    cacheToCache(L1, L2, L1.getLRU(indexL1_int)[0], indexL1_int, instL2[0], instL2[1]);
+
                 }
                 L1.memToCache(tagL1_int, indexL1_int);
                 cacheToCache(L1, L2, tagL1_int, indexL1_int, tagL2_int, indexL2_int);
@@ -226,7 +231,7 @@ public class CacheDriver {
             // hit, write to L1, L2, and memory
             // write to L1 and from L1 to L2
             L1.editCache(tagL1_int, indexL1_int, 0);
-            cacheToCache(L1, L2, tagL1_int, indexL1_int, tagL2_int, indexL2_int);
+            cacheToCacheUpdate(L1, L2, tagL1_int, indexL1_int, tagL2_int, indexL2_int);
           } else if(L2.contains(tagL2_int, indexL2_int)) {
             System.out.println("*L2 hit*");
             // miss L1, hit L2; check write allocate policy, write to L2 and memory
@@ -378,8 +383,7 @@ public class CacheDriver {
   }
   private static void cacheToCacheUpdate(Cache cache1, Cache cache2, int tag1, int index1, int tag2, int index2) {
     int data = cache1.getCacheData(tag1, index1);
-    int lru=cache1.getEntry(tag1, index1).getLRU();
-    cache2.updateData(tag2, index2, data,lru);
+    cache2.updateCache(tag2, index2, data);
   }
 
   public static int increaseTag(int tag, int len) {
