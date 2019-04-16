@@ -146,6 +146,12 @@ public class Cache {
 
     setCache(entry.i(), entry.j(), newCacheEntry(1, tag, data, 0, getLRUCount()));
   }
+
+  public void updateCache2(int tag, int index, int data) {
+    CacheIndex entry = where(index, tag);
+
+    setCache(entry.i(), entry.j(), newCacheEntry(1, tag, data, 1, getLRUCount()));
+  }
   public void updateLRU(int tag, int index) {
     CacheIndex entry = where(index, tag);
     CacheEntry updateEntry=this.getCache()[entry.i][entry.j];
@@ -217,6 +223,12 @@ public class Cache {
     CacheIndex where = where(index, tag);
 
     getCache()[where.i()][where.j()].setLRU(getLRUCount());
+    return getCache()[where.i()][where.j()].getData();
+  }
+
+  public int getCacheData2(int tag, int index) {
+    CacheIndex where = where(index, tag);
+
     return getCache()[where.i()][where.j()].getData();
   }
 

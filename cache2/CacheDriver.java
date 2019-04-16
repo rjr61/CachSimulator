@@ -24,7 +24,7 @@ public class CacheDriver {
     String writePolicy, allocatePolicy, fname, nextInstruction, mode;
 
     // hard-coded values
-    sizeL1 = 512;
+/*    sizeL1 = 512;
     sizeL2 = 2048;
     sizeBlock = 64;
     setAssoc = 4;
@@ -32,10 +32,10 @@ public class CacheDriver {
     latencyL2 = 4;
     maxMisses = 9;
     writePolicy = "wt";
-    allocatePolicy = "nwa";
+    allocatePolicy = "nwa";*/
     mode="aum";
 
-/*    System.out.println("Enter the size of L1: ");
+    System.out.println("Enter the size of L1: ");
     sizeL1 = sc.nextInt();
     System.out.println("Enter the size of L2: ");
     sizeL2 = sc.nextInt();
@@ -44,7 +44,7 @@ public class CacheDriver {
     System.out.println("Enter the set associativity: ");
     setAssoc = sc.nextInt();
     System.out.println("Enter the write policy (wb/wt): ");
-    writePolicy = sc.nextLine();
+    writePolicy = sc.nextLine();writePolicy = sc.nextLine();
     System.out.println("Enter the allocation policy policy (wa/nwa): ");
     allocatePolicy = sc.nextLine();
     System.out.println("Enter the maximum number of outstanding misses: ");
@@ -53,10 +53,9 @@ public class CacheDriver {
     latencyL1 = sc.nextInt();
     System.out.println("Enter the hit latency for L2: ");
     latencyL2 = sc.nextInt();
-    System.out.println("Enter the max number of misses");
-    maxMisses = sc.nextInt();*/
 
     System.out.println("Enter the file name: ");
+    fname = sc.nextLine();
     fname = sc.nextLine();
 
     // cache calculations
@@ -197,9 +196,10 @@ public class CacheDriver {
                   //if its dirty update L2 data
                   instL2 = instDecode(L1.getEvictedInst(indexL1_int), tagLengthL1, indexLengthL1, tagLengthL2, indexLengthL2);
                   ///this is the line
-                  if (readL2(tagL2_int, indexL2_int))
-                  cacheToCacheUpdate(L1, L2, L1.getLRU(indexL1_int)[0], indexL1_int, instL2[0], instL2[1]);
-                  else
+                  if (readL2(instL2[0], instL2[1])) {
+                    cacheToCacheUpdate2(L1, L2, L1.getLRU(indexL1_int)[0], indexL1_int, instL2[0], instL2[1]);
+                  }
+                    else
                     cacheToCache(L1, L2, L1.getLRU(indexL1_int)[0], indexL1_int, instL2[0], instL2[1]);
 
                 }
@@ -385,6 +385,10 @@ public class CacheDriver {
   private static void cacheToCacheUpdate(Cache cache1, Cache cache2, int tag1, int index1, int tag2, int index2) {
     int data = cache1.getCacheData(tag1, index1);
     cache2.updateCache(tag2, index2, data);
+  }
+  private static void cacheToCacheUpdate2(Cache cache1, Cache cache2, int tag1, int index1, int tag2, int index2) {
+    int data = cache1.getCacheData2(tag1, index1);
+    cache2.updateCache2(tag2, index2, data);
   }
 
   public static int increaseTag(int tag, int len) {
