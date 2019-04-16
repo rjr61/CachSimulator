@@ -170,8 +170,8 @@ public class CacheDriver {
               cacheToCache(L2, L1, tagL2_int, indexL2_int, tagL1_int, indexL1_int);
             }
           } else {
-
             System.out.println("**L1 hit**");
+            L1.updateLRU(tagL1_int, indexL1_int);
           }
         }
         else
@@ -217,6 +217,7 @@ public class CacheDriver {
               }
             } else {
               System.out.println("**L1 hit**");
+              L1.updateLRU(tagL1_int, indexL1_int);
             }
           }
       } else if(instType.equals("W")) {

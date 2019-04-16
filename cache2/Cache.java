@@ -216,6 +216,7 @@ public class Cache {
   public int getCacheData(int tag, int index) {
     CacheIndex where = where(index, tag);
 
+    getCache()[where.i()][where.j()].setLRU(getLRUCount());
     return getCache()[where.i()][where.j()].getData();
   }
 
