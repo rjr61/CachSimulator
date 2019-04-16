@@ -24,13 +24,13 @@ public class CacheDriver {
     String writePolicy, allocatePolicy, fname, nextInstruction, mode;
 
     // hard-coded values
-    sizeL1 = 1024;
+    sizeL1 = 512;
     sizeL2 = 2048;
     sizeBlock = 64;
     setAssoc = 4;
     latencyL1 = 1;
-    latencyL2 = 5;
-    maxMisses = 6;
+    latencyL2 = 4;
+    maxMisses = 9;
     writePolicy = "wb";
     allocatePolicy = "wa";
     mode="aum";
